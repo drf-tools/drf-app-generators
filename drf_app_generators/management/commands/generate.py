@@ -49,8 +49,11 @@ class Command(BaseCommand):
 
         app_config = {
             'app_name': options['app_name'],
-            'models': options['models'].split(',')
+            'models': []
         }
+
+        if options['models']:
+            app_config['models'] = options['models'].split(',')
 
         # Create folders for app.
         AppFolderGenerator(app_config)
