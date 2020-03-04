@@ -23,7 +23,7 @@ setup(
     packages=['drf_app_generators', 'drf_app_generators.templates', 'drf_app_generators.management', 'drf_app_generators.management.commands'],
     include_package_data=True,
     install_requires=[
-        'Django>=3.0',
+        'Django>=3.0.3',
         'djangorestframework>=3.11.0'
     ],
 
