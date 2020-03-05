@@ -11,7 +11,7 @@ from drf_app_generators.templates.serializers import SERIALIZER_VIEW
 from drf_app_generators.templates.admin import ADMIN_VIEW
 from drf_app_generators.templates.filters import FILTER_VIEW
 from drf_app_generators.templates.permissions import PERMISSION_VIEW
-from drf_app_generators.templates.tests import TEST_MODEL_VIEW
+from drf_app_generators.templates.tests import TEST_MODEL_VIEW, TEST_API_VIEW
 
 
 INIT_FILENAME = '__init__.py'
@@ -81,11 +81,17 @@ class BaseGenerator(object):
 
     def generate_test_models(self):
         content = self.test_models_content()
-        filename = f'test_{self.app_name}_models.py'
+        filename = f'test_{self.app_name_plural}_models.py'
+        self._generate_file_template(filename, content)
+
+    def generate_test_apis(self):
+        content = self.test_apis_content()
+        filename = f'test_{self.app_name_plural}_apis.py'
         self._generate_file_template(filename, content)
 
     def generate_tests(self):
         self.generate_test_models()
+        self.generate_test_apis()
 
     #--------------------------------------------------
     # Get contents
@@ -116,6 +122,10 @@ class BaseGenerator(object):
 
     def test_models_content(self):
         self.view_template = Template(TEST_MODEL_VIEW)
+        return self._view_template_content()
+
+    def test_apis_content(self):
+        self.view_template = Template(TEST_API_VIEW)
         return self._view_template_content()
 
     #--------------------------------------------------
