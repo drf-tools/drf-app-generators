@@ -50,7 +50,7 @@ class Command(BaseCommand):
 
         app_config = {
             'app_name': options['app_name'],
-            'app_folder_name': pluralize(options['app_name']),
+            'app_name_plural': pluralize(options['app_name']),
             'models': []
         }
 
