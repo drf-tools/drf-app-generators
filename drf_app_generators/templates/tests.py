@@ -119,7 +119,7 @@ class {{ resource.model }}ViewSetTestCase(BaseTestCase):
         self.delete_json_ok('%d/' % {{ resource.model|lower }}.id)
 
         # Get 0 {{ resource.model|lower }}.
-        {{ resource.name }} = {{ resource.model }}.objects.all()
+        {{ resource.name }} = {{ resource.model }}.objects.non_archived_only()
         self.assertEqual(len({{ resource.name }}), 0)
 
         # Fill in futher test cases
