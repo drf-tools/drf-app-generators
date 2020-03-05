@@ -30,4 +30,5 @@ class {{ resource.model }}ViewSet(apis.BaseViewSet):
 
 apps = [{% for resource in resources %}
     {{ resource.model }}ViewSet,{% endfor %}
-]"""
+]
+"""
