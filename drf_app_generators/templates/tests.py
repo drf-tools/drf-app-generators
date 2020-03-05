@@ -95,7 +95,7 @@ class {{ resource.model }}ViewSetTestCase(BaseTestCase):
 
     def test_post_{{ resource.name }}_accepted(self):
         data = {}
-        self.post_json_ok(data=data)
+        self.post_json_created(data=data)
 
         # Get 2 {{ resource.name }}.
         {{ resource.name }} = {{ resource.model }}.objects.all()
@@ -105,7 +105,8 @@ class {{ resource.model }}ViewSetTestCase(BaseTestCase):
 
     def test_put_{{ resource.name }}_accepted(self):
         data = {}
-        self.put_json_ok(data=data)
+        {{ resource.model|lower }} = {{ resource.model }}.objects.first()
+        self.put_json_ok(data=data, fragment='%d/' % {{ resource.model|lower }}.id)
 
         # Get 1 {{ resource.model|lower }}.
         {{ resource.name }} = {{ resource.model }}.objects.all()
