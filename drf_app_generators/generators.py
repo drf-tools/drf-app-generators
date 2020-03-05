@@ -13,6 +13,7 @@ from drf_app_generators.templates.filters import FILTER_VIEW
 from drf_app_generators.templates.permissions import PERMISSION_VIEW
 from drf_app_generators.templates.tests import TEST_MODEL_VIEW
 
+
 INIT_FILENAME = '__init__.py'
 
 
@@ -20,6 +21,7 @@ class BaseGenerator(object):
     def __init__(self, app_config, force=False):
         self.app_config = app_config
         self.app_name = app_config['app_name']
+        self.app_folder_name = app_config['app_folder_name']
         self.force = force
         self.base_dir = os.path.join(os.getcwd())
         self.models = self._get_model_names()
@@ -157,18 +159,18 @@ class AppFolderGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(AppFolderGenerator, self).__init__(app_config, force)
 
-        self.create_folder(self.app_name)
+        self.create_folder(self.app_folder_name)
         self.write_file(
             content='',
             filename=INIT_FILENAME,
-            base_dir=os.path.join(self.base_dir, self.app_name),
+            base_dir=os.path.join(self.base_dir, self.app_folder_name),
         )
 
 
 class MigrationFolderGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(MigrationFolderGenerator, self).__init__(app_config, force)
-        self.base_dir = os.path.join(self.base_dir, self.app_name)
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name)
 
         self.create_folder('migrations')
         self.write_file(
@@ -181,7 +183,7 @@ class MigrationFolderGenerator(BaseGenerator):
 class TestFolderGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(TestFolderGenerator, self).__init__(app_config, force)
-        self.base_dir = os.path.join(self.base_dir, self.app_name)
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name)
 
         self.create_folder('tests')
         self.write_file(
@@ -196,7 +198,7 @@ class ModelGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(ModelGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name)
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name)
         self.view_template = Template(MODEL_VIEW)
         self.generate_models()
 
@@ -206,7 +208,7 @@ class AppConfigGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(AppConfigGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name)
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name)
         self.view_template = Template(APP_VIEW)
         self.generate_app_config()
 
@@ -216,7 +218,7 @@ class ApiGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(ApiGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name)
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name)
         self.view_template = Template(API_VIEW)
         self.generate_apis()
 
@@ -226,7 +228,7 @@ class FactoryGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(FactoryGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name)
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name)
         self.view_template = Template(FACTORY_VIEW)
         self.generate_factories()
 
@@ -236,7 +238,7 @@ class SerializerGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(SerializerGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name)
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name)
         self.view_template = Template(SERIALIZER_VIEW)
         self.generate_serializers()
 
@@ -246,7 +248,7 @@ class AdminGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(AdminGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name)
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name)
         self.view_template = Template(ADMIN_VIEW)
         self.generate_admin()
 
@@ -255,7 +257,7 @@ class FilterGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(FilterGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name)
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name)
         self.view_template = Template(FILTER_VIEW)
         self.generate_filters()
 
@@ -265,7 +267,7 @@ class PermissionGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(PermissionGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name)
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name)
         self.view_template = Template(PERMISSION_VIEW)
         self.generate_permissions()
 
@@ -275,5 +277,5 @@ class UnitTestGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(UnitTestGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name, 'tests')
+        self.base_dir = os.path.join(self.base_dir, self.app_folder_name, 'tests')
         self.generate_tests()

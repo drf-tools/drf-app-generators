@@ -20,6 +20,7 @@ from drf_app_generators.generators import (
     PermissionGenerator,
     UnitTestGenerator,
 )
+from drf_app_generators.helpers import pluralize
 
 
 class Command(BaseCommand):
@@ -49,6 +50,7 @@ class Command(BaseCommand):
 
         app_config = {
             'app_name': options['app_name'],
+            'app_folder_name': pluralize(options['app_name']),
             'models': []
         }
 
