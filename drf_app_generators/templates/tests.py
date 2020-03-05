@@ -24,7 +24,7 @@ class {{ resource.model }}TestCase(TestCase):
         {{ resource.model }}.objects.all().delete()
 
     def test_{{ resource.name }}_can_be_created(self):
-        {{ resource.name }} = {{ model }}.objects.first()
+        {{ resource.name }} = {{ resource.model }}.objects.first()
         self.assertEqual({{ resource.name }}.id, 1)
 
     def test_{{ resource.name }}_can_be_updated(self):
@@ -64,19 +64,21 @@ class {{ resource.model }}ViewSetTestCase(BaseTestCase):
 
     def test_post_{{ resource.name }}_forbidden(self):
         self.auth = None
-        self.post_json_method_forbidden()
+        data = {}
+        self.post_json_method_forbidden(data=data)
 
     def test_put_{{ resource.name }}_forbidden(self):
         self.auth = None
-        self.put_json_method_forbidden()
+        data = {}
+        self.put_json_method_forbidden(data=data)
 
     def test_patch_{{ resource.name }}_forbidden(self):
         self.auth = None
-        self.patch_json_method_forbidden()
+        self.patch_json_forbidden()
 
     def test_delete_{{ resource.name }}_forbidden(self):
         self.auth = None
-        self.delete_json_method_forbidden()
+        self.delete_method_forbidden()
 
     #==============================================================================
     # API should be success with authenticated users.
