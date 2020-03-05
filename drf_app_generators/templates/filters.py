@@ -13,4 +13,5 @@ class {{ model }}Filtering(BaseFiltering):
 
     class Meta:
         model = {{ model }}
+        exclude = []
 {% endfor %}"""

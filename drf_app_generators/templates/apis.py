@@ -25,7 +25,7 @@ class {{ resource.model }}ViewSet(apis.BaseViewSet):
     ordering_fields = '__all__'
     search_fields = []
 
-    resource_name = {{ resource.name }}
+    resource_name = '{{ resource.name }}'
 {% endfor %}
 
 apps = [{% for resource in resources %}
