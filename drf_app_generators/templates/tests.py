@@ -115,7 +115,7 @@ class {{ resource.model }}ViewSetTestCase(BaseTestCase):
 
     def test_delete_{{ resource.name }}_accepted(self):
         {{ resource.model|lower }} = {{ resource.model }}.objects.first()
-        self.delete_json_ok(f'{{{ resource.model|lower }}.id}/')
+        self.delete_json_ok('%d/' % {{ resource.model|lower }}.id)
 
         # Get 0 {{ resource.model|lower }}.
         {{ resource.name }} = {{ resource.model }}.objects.all()
