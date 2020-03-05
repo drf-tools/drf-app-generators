@@ -47,15 +47,27 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print('::generate::')
+        models = []
+        resources = []
+
+        if options['models']:
+            models = options['models'].split(',')
+
+        for model in models:
+            resource = {
+                'model': model,
+                'name': pluralize(model).lower(),
+            }
+            resources.append(resource)
 
         app_config = {
             'app_name': options['app_name'],
             'app_name_plural': pluralize(options['app_name']),
-            'models': []
+            'models': models,
+            'resources': resources, # resources are plural of models, for the apis.
         }
 
-        if options['models']:
-            app_config['models'] = options['models'].split(',')
+
 
         # Create folders for app.
         AppFolderGenerator(app_config)

@@ -22,6 +22,7 @@ class BaseGenerator(object):
         self.app_config = app_config
         self.app_name = app_config['app_name']
         self.app_name_plural = app_config['app_name_plural']
+        self.resources = app_config['resources']
         self.force = force
         self.base_dir = os.path.join(os.getcwd())
         self.models = self._get_model_names()
@@ -33,6 +34,7 @@ class BaseGenerator(object):
             'app': self.app_name_plural,
             'app_name': self.app_name, # This is singular app name.
             'models': self.models,
+            'resources': self.resources
         })
     #--------------------------------------------------
     # Generate files
