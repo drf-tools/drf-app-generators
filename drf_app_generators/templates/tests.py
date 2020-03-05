@@ -34,7 +34,7 @@ class {{ resource.model }}TestCase(TestCase):
         pass
 {% endfor %}"""
 
-TEST_API_VIEW = """from core.tests import BaseTestCase
+TEST_API_VIEW = """from drf_core.tests import BaseTestCase
 from {{ app }}.factories import ({% for model in models %}
     {{ model }}Factory,{% endfor %}
 )

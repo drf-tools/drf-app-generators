@@ -1,8 +1,8 @@
 __all__ = ['MODEL_VIEW']
 
 MODEL_VIEW = """from django.db import models
-from core.models import TimeStampedModel, QuerySet
-from core import fields
+from drf_core.models import TimeStampedModel, QuerySet
+from drf_core import fields
 {% for model in models %}
 
 # =============================================================================

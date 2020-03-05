@@ -1,6 +1,6 @@
 __all__ = ['API_VIEW']
 
-API_VIEW = """from core import apis
+API_VIEW = """from drf_core import apis
 from {{ app }}.models import ({% for model in models %}
     {{ model }},{% endfor %}
 )

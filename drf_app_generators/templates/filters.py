@@ -1,6 +1,6 @@
 __all__ = ['FILTER_VIEW']
 
-FILTER_VIEW = """from core.filtering import BaseFiltering
+FILTER_VIEW = """from drf_core.filtering import BaseFiltering
 from {{ app }}.models import ({% for model in models %}
     {{ model }},{% endfor %}
 )

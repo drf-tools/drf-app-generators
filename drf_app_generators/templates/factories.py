@@ -1,6 +1,6 @@
 __all__ = ['FACTORY_VIEW']
 
-FACTORY_VIEW = """from core import factories
+FACTORY_VIEW = """from drf_core import factories
 from {{ app }}.models import ({% for model in models %}
     {{ model }},{% endfor %}
 )

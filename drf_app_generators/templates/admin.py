@@ -1,7 +1,7 @@
 __all__ = ['ADMIN_VIEW']
 
 ADMIN_VIEW = """from django.contrib import admin
-from core.admin import BaseModelAdmin
+from drf_core.admin import BaseModelAdmin
 
 from {{ app }}.models import ({% for model in models %}
     {{ model }},{% endfor %}
