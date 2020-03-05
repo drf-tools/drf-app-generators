@@ -80,9 +80,6 @@ class Command(BaseCommand):
         SerializerGenerator(app_config)
         AdminGenerator(app_config)
         UnitTestGenerator(app_config)
+        FilterGenerator(app_config)
+        PermissionGenerator(app_config)
 
-        if options['filter']:
-            FilterGenerator(app_config)
-
-        if options['permission']:
-            PermissionGenerator(app_config)
