@@ -74,7 +74,8 @@ class {{ resource.model }}ViewSetTestCase(BaseTestCase):
 
     def test_patch_{{ resource.name }}_forbidden(self):
         self.auth = None
-        self.patch_json_forbidden()
+        data = {}
+        self.patch_json_forbidden(data=data)
 
     def test_delete_{{ resource.name }}_forbidden(self):
         self.auth = None
@@ -113,13 +114,12 @@ class {{ resource.model }}ViewSetTestCase(BaseTestCase):
         # Fill in futher test cases
 
     def test_delete_{{ resource.name }}_accepted(self):
-        self.delete_json_ok()
+        {{ resource.model|lower }} = {{ resource.model }}.objects.first()
+        self.delete_json_ok(f'{{{ resource.model|lower }}.id}/')
 
         # Get 0 {{ resource.model|lower }}.
         {{ resource.name }} = {{ resource.model }}.objects.all()
         self.assertEqual(len({{ resource.name }}), 0)
 
         # Fill in futher test cases
-
-{% endfor %}
-"""
+{% endfor %}"""
