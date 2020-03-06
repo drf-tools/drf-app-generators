@@ -80,14 +80,24 @@ class BaseGenerator(object):
         self._generate_file_template(filename, content)
 
     def generate_test_models(self):
-        content = self.test_models_content()
-        filename = f'test_{self.app_name_plural}_models.py'
-        self._generate_file_template(filename, content)
+        # Create a folder for model tests
+        self.create_folder(
+            os.path.join(self.base_dir, 'models')
+        )
+        for model in self.models:
+            content = self.test_model_content(model=model)
+            filename = f'models/test_{model.lower()}_models.py'
+            self._generate_file_template(filename, content)
 
     def generate_test_apis(self):
-        content = self.test_apis_content()
-        filename = f'test_{self.app_name_plural}_apis.py'
-        self._generate_file_template(filename, content)
+        # Create a folder for model tests
+        self.create_folder(
+            os.path.join(self.base_dir, 'apis')
+        )
+        for model in self.models:
+            content = self.test_api_content(model=model)
+            filename = f'apis/test_{model.lower()}_apis.py'
+            self._generate_file_template(filename, content)
 
     def generate_tests(self):
         self.generate_test_models()
@@ -120,13 +130,21 @@ class BaseGenerator(object):
     def permissions_content(self):
         return self._view_template_content()
 
-    def test_models_content(self):
+    def test_model_content(self, model):
+        context = Context({
+            'app': self.app_name_plural,
+            'model': model,
+        })
         self.view_template = Template(TEST_MODEL_VIEW)
-        return self._view_template_content()
+        return self._view_template_content(context=context)
 
-    def test_apis_content(self):
+    def test_api_content(self, model):
+        context = Context({
+            'app': self.app_name_plural,
+            'model': model,
+        })
         self.view_template = Template(TEST_API_VIEW)
-        return self._view_template_content()
+        return self._view_template_content(context=context)
 
     #--------------------------------------------------
     # Internal methods
