@@ -5,32 +5,31 @@ Generate DRF standard apps with a single command.
 Install with pip
 
 ```bash
-    $ pip install -e git+https://github.com/tranquochuy/drf-app-generators#egg=drf-app-generators
+$ pip install -e git+https://github.com/tranquochuy/drf-app-generators#egg=drf-app-generators
 ```
 
 To use DRF app generators, add it to INSTALLED_APPS.
 
 ```code-block:: python
-    INSTALLED_APPS = (
-        ...
-        'rest_framework',
-        'drf_app_generators',
-        ...
-    )
+INSTALLED_APPS = (
+    ...
+    'rest_framework',
+    'drf_app_generators',
+    ...
+)
 ```
 
 ## Usage
 To use the generators, run the following command.
 
 ```bash
-    $ python manage.py generate {app} {options}
+$ python manage.py generate {app} {options}
 ```
 
-========================== =======================================
-Options                     Description
-========================== =======================================
-`--models`                  A list of model names.
-========================== =======================================
+| Options                 | Description                           |
+|-------------------------|---------------------------------------|
+|`--models`               | A list of model names.                |
+
 
 Example: Generate a new app with 3 models.
 ```bash
@@ -61,4 +60,4 @@ Example: Generate a new app with 3 models.
 A full application built with drf-generators can be found in the tests directory.
 
 ## License
-MIT License. See `LICENSE <https://github.com/tranquochuy/drf-app-generators/blob/master/LICENSE>`_.
+MIT License. See [LICENSE](https://github.com/tranquochuy/drf-app-generators/blob/master/LICENSE).
