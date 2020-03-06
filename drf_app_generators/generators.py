@@ -82,7 +82,8 @@ class BaseGenerator(object):
     def generate_test_models(self):
         # Create a folder for model tests
         self.create_folder(
-            os.path.join(self.base_dir, 'models')
+            os.path.join(self.base_dir, 'models'),
+            init=True,
         )
         for model in self.models:
             content = self.test_model_content(model=model)
@@ -92,7 +93,8 @@ class BaseGenerator(object):
     def generate_test_apis(self):
         # Create a folder for model tests
         self.create_folder(
-            os.path.join(self.base_dir, 'apis')
+            os.path.join(self.base_dir, 'apis'),
+            init=True,
         )
         for model in self.models:
             content = self.test_api_content(model=model)
@@ -164,9 +166,17 @@ class BaseGenerator(object):
     def _get_model_names(self):
         return self.app_config['models']
 
-    def create_folder(self, folder_name, force=False):
+    def create_folder(self, folder_name, force=False, init=False):
         folder_path = os.path.join(self.base_dir, folder_name)
         Path(folder_path).mkdir(parents=False, exist_ok=force)
+
+        if init:
+            # create __init__.py file for this folder.
+            self.write_file(
+                content='',
+                filename='__init__.py',
+                base_dir=folder_path,
+            )
 
     def write_file(self, content, filename, base_dir=None):
         if base_dir is None:
