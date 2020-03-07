@@ -14,4 +14,9 @@ class {{ model }}Factory(factories.ModelFactory):
 
     class Meta:
         model = {{ model }}
-{% endfor %}"""
+{% endfor %}
+
+apps = [{% for model in models %}
+    {{ model }}Factory,{% endfor %}
+]
+"""
