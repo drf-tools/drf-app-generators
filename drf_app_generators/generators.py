@@ -12,6 +12,7 @@ from drf_app_generators.templates.admin import ADMIN_VIEW
 from drf_app_generators.templates.filters import FILTER_VIEW
 from drf_app_generators.templates.permissions import PERMISSION_VIEW
 from drf_app_generators.templates.tests import TEST_MODEL_VIEW, TEST_API_VIEW
+from drf_app_generators.templates.apidoc import APIDOC_VIEW
 
 
 INIT_FILENAME = '__init__.py'
@@ -105,6 +106,18 @@ class BaseGenerator(object):
         self.generate_test_models()
         self.generate_test_apis()
 
+    def generate_apidoc(self):
+        """
+        Generate API doc based on template.
+        """
+        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.create_folder(self.base_dir)
+
+        for resource in self.resources:
+            content = self.apidoc_content(resource=resource)
+            filename = f'{resource["name"]}.md'
+            self._generate_file_template(filename, content)
+
     #--------------------------------------------------
     # Get contents
     #--------------------------------------------------
@@ -146,6 +159,14 @@ class BaseGenerator(object):
             'model': model,
         })
         self.view_template = Template(TEST_API_VIEW)
+        return self._view_template_content(context=context)
+
+    def apidoc_content(self, resource=None):
+        context = Context({
+            'app': self.app_name_plural,
+            'resource': resource,
+        })
+        self.view_template = Template(APIDOC_VIEW)
         return self._view_template_content(context=context)
 
     #--------------------------------------------------
@@ -320,3 +341,12 @@ class UnitTestGenerator(BaseGenerator):
 
         self.base_dir = os.path.join(self.base_dir, self.app_name_plural, 'tests')
         self.generate_tests()
+
+
+class ApidocGenerator(BaseGenerator):
+
+    def __init__(self, app_config, force=False):
+        super(ApidocGenerator, self).__init__(app_config, force)
+
+        self.base_dir = os.path.join(self.base_dir, '../doc')
+        self.generate_apidoc()

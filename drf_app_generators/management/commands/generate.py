@@ -19,6 +19,7 @@ from drf_app_generators.generators import (
     FilterGenerator,
     PermissionGenerator,
     UnitTestGenerator,
+    ApidocGenerator,
 )
 from drf_app_generators.helpers import pluralize
 
@@ -44,6 +45,11 @@ class Command(BaseCommand):
             action='store_true',
             help='Generate permissions file',
         )
+        parser.add_argument(
+            '--apidoc',
+            action='store_true',
+            help='Generate api doc',
+        )
 
     def handle(self, *args, **options):
         print('::generate::')
@@ -67,8 +73,6 @@ class Command(BaseCommand):
             'resources': resources, # resources are plural of models, for the apis.
         }
 
-
-
         # Create folders for app.
         AppFolderGenerator(app_config)
         MigrationFolderGenerator(app_config)
@@ -83,3 +87,5 @@ class Command(BaseCommand):
         FilterGenerator(app_config)
         PermissionGenerator(app_config)
 
+        if options['apidoc']:
+            ApidocGenerator(app_config)
