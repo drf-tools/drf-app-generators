@@ -29,6 +29,7 @@ $ python manage.py generate {app} {options}
 | Options                 | Description                           |
 |-------------------------|---------------------------------------|
 |`--models`               | A list of model names.                |
+|`--apidoc`               | Generate written API document         |
 
 
 Example: Generate a new app with 3 models.
