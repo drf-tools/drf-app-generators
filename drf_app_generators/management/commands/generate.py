@@ -36,16 +36,6 @@ class Command(BaseCommand):
             help='List of models you want to generate',
         )
         parser.add_argument(
-            '--filter',
-            action='store_true',
-            help='Generate filters file',
-        )
-        parser.add_argument(
-            '--permission',
-            action='store_true',
-            help='Generate permissions file',
-        )
-        parser.add_argument(
             '--apidoc',
             action='store_true',
             help='Generate api doc',
