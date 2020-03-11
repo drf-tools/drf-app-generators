@@ -64,96 +64,6 @@ class {{ resource.model }}TestCase(TestCase):
         pass
 {% endfor %}"""
 
-TEST_APIS_VIEW = """from drf_core.tests import BaseTestCase
-from {{ app }}.factories import ({% for model in models %}
-    {{ model }}Factory,{% endfor %}
-)
-from {{ app }}.models import ({% for model in models %}
-    {{ model }},{% endfor %}
-)
-from {{ app }}.apis import ({% for model in models %}
-    {{ model }}ViewSet,{% endfor %}
-)
-{% for resource in resources %}
-
-class {{ resource.model }}ViewSetTestCase(BaseTestCase):
-    resource = {{ resource.model }}ViewSet
-
-    def setUp(self):
-        super().setUp()
-
-        # Create a {{ resource.model }} for testing
-        {{ resource.model }}Factory()
-
-    #==============================================================================
-    # API should be forbidden if user is not logged in.
-    #==============================================================================
-    def test_get_{{ resource.name }}_forbidden(self):
-        self.auth = None
-        self.get_json_method_forbidden()
-
-    def test_post_{{ resource.name }}_forbidden(self):
-        self.auth = None
-        data = {}
-        self.post_json_method_forbidden(data=data)
-
-    def test_put_{{ resource.name }}_forbidden(self):
-        self.auth = None
-        data = {}
-        self.put_json_method_forbidden(data=data)
-
-    def test_patch_{{ resource.name }}_forbidden(self):
-        self.auth = None
-        data = {}
-        self.patch_json_forbidden(data=data)
-
-    def test_delete_{{ resource.name }}_forbidden(self):
-        self.auth = None
-        self.delete_method_forbidden()
-
-    #==============================================================================
-    # API should be success with authenticated users.
-    #==============================================================================
-    def test_get_{{ resource.name }}_accepted(self):
-        self.get_json_ok()
-
-        # Get 1 {{ resource.model|lower }}.
-        {{ resource.name }} = {{ resource.model }}.objects.all()
-        self.assertEqual(len({{ resource.name }}), 1)
-
-        # Fill in futher test cases
-
-    def test_post_{{ resource.name }}_accepted(self):
-        data = {}
-        self.post_json_created(data=data)
-
-        # Get 2 {{ resource.name }}.
-        {{ resource.name }} = {{ resource.model }}.objects.all()
-        self.assertEqual(len({{ resource.name }}), 2)
-
-        # Fill in futher test cases
-
-    def test_put_{{ resource.name }}_accepted(self):
-        data = {}
-        {{ resource.model|lower }} = {{ resource.model }}.objects.first()
-        self.put_json_ok(data=data, fragment='%d/' % {{ resource.model|lower }}.id)
-
-        # Get 1 {{ resource.model|lower }}.
-        {{ resource.name }} = {{ resource.model }}.objects.all()
-        self.assertEqual(len({{ resource.name }}), 1)
-
-        # Fill in futher test cases
-
-    def test_delete_{{ resource.name }}_accepted(self):
-        {{ resource.model|lower }} = {{ resource.model }}.objects.first()
-        self.delete_json_ok('%d/' % {{ resource.model|lower }}.id)
-
-        # Get 0 {{ resource.model|lower }}.
-        {{ resource.name }} = {{ resource.model }}.objects.non_archived_only()
-        self.assertEqual(len({{ resource.name }}), 0)
-
-        # Fill in futher test cases
-{% endfor %}"""
 
 TEST_API_VIEW = """from drf_core.tests import BaseTestCase
 from {{ app }}.factories import {{ model }}Factory
@@ -207,6 +117,39 @@ class {{ model }}ViewSetTestCase(BaseTestCase):
         self.assertEqual(len({{ model|lower }}), 1)
 
         # Fill in futher test cases
+
+    def test_get_pagination_{{ model|lower }}_ok(self):
+        self.sampling.generate_by_model(
+            app_name='{{ app }}',
+            model_name='{{ model }}',
+            sampling=100,
+        )
+
+        # Get 101 {{ resource.name }}.
+        {{ resource.name }} = {{ model }}.objects.all()
+        self.assertEqual(len({{ resource.name }}), 101)
+
+        # Test default case
+        resp = self.get_json_ok('', limit=10)
+        resp_json = self.deserialize(resp)
+
+        # Check response JSON
+        self.assertEqual(resp_json['count'], 101)
+        self.assertEqual(resp_json['previous'], None)
+        self.assertEqual(type(resp_json['next']), str)
+        self.assertEqual(type(resp_json['results']), list)
+        self.assertEqual(len(resp_json['results']), 10)
+
+        # Test another case
+        resp = self.get_json_ok('', limit=25, offset=25)
+        resp_json = self.deserialize(resp)
+
+        # Check response JSON
+        self.assertEqual(resp_json['count'], 101)
+        self.assertEqual(type(resp_json['next']), str)
+        self.assertEqual(type(resp_json['previous']), str)
+        self.assertEqual(type(resp_json['results']), list)
+        self.assertEqual(len(resp_json['results']), 25)
 
     def test_post_{{ model|lower }}_accepted(self):
         data = {}

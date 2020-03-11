@@ -114,9 +114,9 @@ class BaseGenerator(object):
             os.path.join(self.base_dir, 'apis'),
             init=True,
         )
-        for model in self.models:
-            content = self.test_api_content(model=model)
-            filename = f'apis/test_{model.lower()}_apis.py'
+        for resource in self.resources:
+            content = self.test_api_content(resource=resource)
+            filename = f'apis/test_{resource["model"].lower()}_apis.py'
             self._generate_file_template(filename, content)
 
     def generate_tests(self):
@@ -196,10 +196,11 @@ class BaseGenerator(object):
         self.view_template = Template(TEST_MODEL_VIEW)
         return self._view_template_content(context=context)
 
-    def test_api_content(self, model):
+    def test_api_content(self, resource):
         context = Context({
             'app': self.app_name_plural,
-            'model': model,
+            'model': resource['model'],
+            'resource': resource
         })
         self.view_template = Template(TEST_API_VIEW)
         return self._view_template_content(context=context)
