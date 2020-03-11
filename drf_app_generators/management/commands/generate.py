@@ -40,14 +40,23 @@ class Command(BaseCommand):
             action='store_true',
             help='Generate api doc',
         )
+        parser.add_argument(
+            '--expand',
+            action='store_true',
+            help='Expand models, apis, factories, serializers to folders',
+        )
 
     def handle(self, *args, **options):
         print('::generate::')
         models = []
         resources = []
+        is_expand = False
 
         if options['models']:
             models = options['models'].split(',')
+
+        if options['expand']:
+            is_expand = True
 
         for model in models:
             resource = {
@@ -61,6 +70,7 @@ class Command(BaseCommand):
             'app_name_plural': pluralize(options['app_name']),
             'models': models,
             'resources': resources, # resources are plural of models, for the apis.
+            'is_expand': is_expand,
         }
 
         # Create folders for app.

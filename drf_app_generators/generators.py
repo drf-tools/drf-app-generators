@@ -3,11 +3,11 @@ from pathlib import Path
 from django.template import Template, Context
 
 from django.conf import settings
-from drf_app_generators.templates.models import MODEL_VIEW
+from drf_app_generators.templates.models import MODEL_VIEW, MODELS_VIEW
 from drf_app_generators.templates.apps import APP_VIEW
-from drf_app_generators.templates.apis import API_VIEW
-from drf_app_generators.templates.factories import FACTORY_VIEW
-from drf_app_generators.templates.serializers import SERIALIZER_VIEW
+from drf_app_generators.templates.apis import API_VIEW, APIS_VIEW
+from drf_app_generators.templates.factories import FACTORY_VIEW, FACTORIES_VIEW
+from drf_app_generators.templates.serializers import SERIALIZER_VIEW, SERIALIZERS_VIEW
 from drf_app_generators.templates.admin import ADMIN_VIEW
 from drf_app_generators.templates.filters import FILTER_VIEW
 from drf_app_generators.templates.permissions import PERMISSION_VIEW
@@ -24,6 +24,7 @@ class BaseGenerator(object):
         self.app_name = app_config['app_name']
         self.app_name_plural = app_config['app_name_plural']
         self.resources = app_config['resources']
+        self.is_expand = app_config['is_expand']
         self.force = force
         self.base_dir = os.path.join(os.getcwd())
         self.models = self._get_model_names()
@@ -41,9 +42,10 @@ class BaseGenerator(object):
     # Generate files
     #--------------------------------------------------
     def generate_models(self):
-        content = self.models_content()
-        filename = 'models.py'
-        self._generate_file_template(filename, content)
+        if self.is_expand:
+            self._generate_by_group(group_name='models')
+        else:
+            self._generate_single_view(name='models')
 
     def generate_app_config(self):
         content = self.app_config_content()
@@ -51,19 +53,22 @@ class BaseGenerator(object):
         self._generate_file_template(filename, content)
 
     def generate_apis(self):
-        content = self.apis_content()
-        filename = 'apis.py'
-        self._generate_file_template(filename, content)
+        if self.is_expand:
+            self._generate_by_group(group_name='apis')
+        else:
+            self._generate_single_view(name='apis')
 
     def generate_factories(self):
-        content = self.factories_content()
-        filename = 'factories.py'
-        self._generate_file_template(filename, content)
+        if self.is_expand:
+            self._generate_by_group(group_name='factories')
+        else:
+            self._generate_single_view(name='factories')
 
     def generate_serializers(self):
-        content = self.serializers_content()
-        filename = 'serializers.py'
-        self._generate_file_template(filename, content)
+        if self.is_expand:
+            self._generate_by_group(group_name='serializers')
+        else:
+            self._generate_single_view(name='serializers')
 
     def generate_admin(self):
         content = self.admin_content()
@@ -121,19 +126,41 @@ class BaseGenerator(object):
     #--------------------------------------------------
     # Get contents
     #--------------------------------------------------
-    def models_content(self):
+    def get_grouping_content(self, resource, view):
+        context = self.context
+        if resource is not None:
+            context = Context({
+                'app': self.app_name_plural,
+                'resource': resource,
+            })
+            self.view_template = Template(view)
+
+        return self._view_template_content(context=context)
+
+    def models_content(self, resource=None):
+        if resource is not None:
+            return self.get_grouping_content(resource=resource, view=MODEL_VIEW)
         return self._view_template_content()
 
     def app_config_content(self):
         return self._view_template_content()
 
-    def apis_content(self):
+    def apis_content(self, resource=None):
+        if resource is not None:
+            return self.get_grouping_content(resource=resource, view=API_VIEW)
         return self._view_template_content()
 
-    def factories_content(self):
+    def factories_content(self, resource=None):
+        if resource is not None:
+            return self.get_grouping_content(resource=resource, view=FACTORY_VIEW)
         return self._view_template_content()
 
-    def serializers_content(self):
+    def serializers_content(self, resource=None):
+        if resource is not None:
+            return self.get_grouping_content(resource=resource, view=SERIALIZER_VIEW)
+        return self._view_template_content()
+
+    def serializer_content(self):
         return self._view_template_content()
 
     def admin_content(self):
@@ -172,6 +199,22 @@ class BaseGenerator(object):
     #--------------------------------------------------
     # Internal methods
     #--------------------------------------------------
+    def _generate_by_group(self, group_name):
+        # Create folder for the group.
+        self.create_folder(
+            os.path.join(self.base_dir, group_name),
+            init=True,
+        )
+        for resource in self.resources:
+            content = getattr(self, f'{group_name}_content')(resource=resource)
+            filename = f'{group_name}/{resource["name"]}.py'
+            self._generate_file_template(filename, content)
+
+    def _generate_single_view(self, name):
+        content = getattr(self, f'{name}_content')()
+        filename = f'{name}.py'
+        self._generate_file_template(filename, content)
+
     def _generate_file_template(self, filename, content):
         if filename is None or filename == '':
             return
@@ -261,7 +304,7 @@ class ModelGenerator(BaseGenerator):
         super(ModelGenerator, self).__init__(app_config, force)
 
         self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
-        self.view_template = Template(MODEL_VIEW)
+        self.view_template = Template(MODELS_VIEW)
         self.generate_models()
 
 
@@ -281,7 +324,7 @@ class ApiGenerator(BaseGenerator):
         super(ApiGenerator, self).__init__(app_config, force)
 
         self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
-        self.view_template = Template(API_VIEW)
+        self.view_template = Template(APIS_VIEW)
         self.generate_apis()
 
 
@@ -291,7 +334,7 @@ class FactoryGenerator(BaseGenerator):
         super(FactoryGenerator, self).__init__(app_config, force)
 
         self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
-        self.view_template = Template(FACTORY_VIEW)
+        self.view_template = Template(FACTORIES_VIEW)
         self.generate_factories()
 
 
@@ -301,7 +344,7 @@ class SerializerGenerator(BaseGenerator):
         super(SerializerGenerator, self).__init__(app_config, force)
 
         self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
-        self.view_template = Template(SERIALIZER_VIEW)
+        self.view_template = Template(SERIALIZERS_VIEW)
         self.generate_serializers()
 
 
