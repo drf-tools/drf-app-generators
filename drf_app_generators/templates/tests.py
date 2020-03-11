@@ -118,7 +118,7 @@ class {{ model }}ViewSetTestCase(BaseTestCase):
 
         # Fill in futher test cases
 
-    def test_get_pagination_{{ model|lower }}_ok(self):
+    def test_get_{{ model|lower }}_pagination_ok(self):
         self.sampling.generate_by_model(
             app_name='{{ app }}',
             model_name='{{ model }}',
