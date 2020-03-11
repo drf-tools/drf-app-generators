@@ -1,4 +1,4 @@
-__all__ = ['FACTORY_VIEW', 'FACTORIES_VIEW']
+__all__ = ['FACTORY_VIEW', 'FACTORIES_VIEW', 'FACTORY_INIT']
 
 FACTORIES_VIEW = """from drf_core import factories
 from {{ app }}.models import ({% for model in models %}
@@ -22,7 +22,7 @@ apps = [{% for model in models %}
 """
 
 FACTORY_VIEW = """from drf_core import factories
-from {{ resource.app }}.models.{{ resource.model }} import {{ resource.model }}
+from {{ app }}.models.{{ resource.name }} import {{ resource.model }}
 
 
 # =============================================================================
@@ -39,3 +39,6 @@ apps = [
     {{ resource.model }}Factory
 ]
 """
+
+FACTORY_INIT = """{% for resource in resources %}from {{ app }}.factories.{{ resource.name }} import {{ resource.model }}Factory
+{% endfor %}"""

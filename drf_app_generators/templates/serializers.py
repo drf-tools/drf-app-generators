@@ -1,4 +1,4 @@
-__all__ = ['SERIALIZER_VIEW', 'SERIALIZERS_VIEW']
+__all__ = ['SERIALIZER_VIEW', 'SERIALIZERS_VIEW', 'SERIALIZER_INIT']
 
 SERIALIZERS_VIEW = """from rest_framework import serializers
 
@@ -33,3 +33,6 @@ class {{ resource.model }}Serializer(serializers.ModelSerializer):
         model = {{ resource.model }}
         fields = '__all__'
 """
+
+SERIALIZER_INIT = """{% for resource in resources %}from {{ app }}.serializers.{{ resource.name }} import {{ resource.model }}Serializer
+{% endfor %}"""

@@ -3,11 +3,16 @@ from pathlib import Path
 from django.template import Template, Context
 
 from django.conf import settings
-from drf_app_generators.templates.models import MODEL_VIEW, MODELS_VIEW
+from drf_app_generators.templates.init import INIT_FILE
+from drf_app_generators.templates.models import MODEL_VIEW, MODELS_VIEW, MODEL_INIT
 from drf_app_generators.templates.apps import APP_VIEW
-from drf_app_generators.templates.apis import API_VIEW, APIS_VIEW
-from drf_app_generators.templates.factories import FACTORY_VIEW, FACTORIES_VIEW
-from drf_app_generators.templates.serializers import SERIALIZER_VIEW, SERIALIZERS_VIEW
+from drf_app_generators.templates.apis import API_VIEW, APIS_VIEW, API_INIT
+from drf_app_generators.templates.factories import FACTORY_VIEW, FACTORIES_VIEW, FACTORY_INIT
+from drf_app_generators.templates.serializers import (
+    SERIALIZER_VIEW,
+    SERIALIZERS_VIEW,
+    SERIALIZER_INIT,
+)
 from drf_app_generators.templates.admin import ADMIN_VIEW
 from drf_app_generators.templates.filters import FILTER_VIEW
 from drf_app_generators.templates.permissions import PERMISSION_VIEW
@@ -43,7 +48,8 @@ class BaseGenerator(object):
     #--------------------------------------------------
     def generate_models(self):
         if self.is_expand:
-            self._generate_by_group(group_name='models')
+            # generate init view
+            self._generate_by_group(group_name='models', init_view=MODEL_INIT)
         else:
             self._generate_single_view(name='models')
 
@@ -54,19 +60,25 @@ class BaseGenerator(object):
 
     def generate_apis(self):
         if self.is_expand:
-            self._generate_by_group(group_name='apis')
+            self._generate_by_group(
+                group_name='apis',
+                init_view=API_INIT)
         else:
             self._generate_single_view(name='apis')
 
     def generate_factories(self):
         if self.is_expand:
-            self._generate_by_group(group_name='factories')
+            self._generate_by_group(
+                group_name='factories',
+                init_view=FACTORY_INIT)
         else:
             self._generate_single_view(name='factories')
 
     def generate_serializers(self):
         if self.is_expand:
-            self._generate_by_group(group_name='serializers')
+            self._generate_by_group(
+                group_name='serializers',
+                init_view=SERIALIZER_INIT)
         else:
             self._generate_single_view(name='serializers')
 
@@ -137,6 +149,10 @@ class BaseGenerator(object):
 
         return self._view_template_content(context=context)
 
+    def get_init_content(self, init_view):
+        self.view_template = Template(init_view)
+        return self._view_template_content()
+
     def models_content(self, resource=None):
         if resource is not None:
             return self.get_grouping_content(resource=resource, view=MODEL_VIEW)
@@ -199,12 +215,19 @@ class BaseGenerator(object):
     #--------------------------------------------------
     # Internal methods
     #--------------------------------------------------
-    def _generate_by_group(self, group_name):
+    def _generate_by_group(self, group_name, init_view=None):
         # Create folder for the group.
         self.create_folder(
             os.path.join(self.base_dir, group_name),
-            init=True,
+            init=True if init_view is None else False,
         )
+
+        # Create init file
+        if init_view:
+            content = self.get_init_content(init_view=init_view)
+            self._generate_file_template(
+                filename=f'{group_name}/__init__.py', content=content)
+
         for resource in self.resources:
             content = getattr(self, f'{group_name}_content')(resource=resource)
             filename = f'{group_name}/{resource["name"]}.py'
@@ -266,7 +289,7 @@ class AppFolderGenerator(BaseGenerator):
 
         self.create_folder(self.app_name_plural)
         self.write_file(
-            content='',
+            content=INIT_FILE,
             filename=INIT_FILENAME,
             base_dir=os.path.join(self.base_dir, self.app_name_plural),
         )

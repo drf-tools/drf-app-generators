@@ -41,7 +41,7 @@ class Command(BaseCommand):
             help='Generate api doc',
         )
         parser.add_argument(
-            '--expand',
+            '--nested',
             action='store_true',
             help='Expand models, apis, factories, serializers to folders',
         )
@@ -55,7 +55,7 @@ class Command(BaseCommand):
         if options['models']:
             models = options['models'].split(',')
 
-        if options['expand']:
+        if options['nested']:
             is_expand = True
 
         for model in models:

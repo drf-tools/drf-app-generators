@@ -1,4 +1,4 @@
-__all__ = ['APIS_VIEW', 'API_VIEW']
+__all__ = ['APIS_VIEW', 'API_VIEW', 'API_INIT']
 
 APIS_VIEW = """from drf_core import apis
 from {{ app }}.models import ({% for model in models %}
@@ -55,5 +55,13 @@ class {{ resource.model }}ViewSet(apis.BaseViewSet):
 
 apps = [
     {{ resource.model }}ViewSet,
+]
+"""
+
+API_INIT = """{% for resource in resources %}from {{ app }}.apis.{{ resource.name }} import {{ resource.model }}ViewSet
+{% endfor %}
+
+apps = [{% for resource in resources %}
+    {{ resource.model }}ViewSet,{% endfor %}
 ]
 """

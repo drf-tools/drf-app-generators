@@ -1,4 +1,4 @@
-__all__ = ['MODEL_VIEW', 'MODELS_VIEW']
+__all__ = ['MODEL_VIEW', 'MODELS_VIEW', 'MODEL_INIT']
 
 MODELS_VIEW = """from django.db import models
 
@@ -34,3 +34,6 @@ class {{ resource.model }}(TimeStampedModel):
 
     objects = {{ resource.model }}QuerySet.as_manager()
 """
+
+MODEL_INIT = """{% for resource in resources %}from {{ app }}.models.{{ resource.name }} import {{ resource.model }}
+{% endfor %}"""
