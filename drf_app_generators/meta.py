@@ -197,11 +197,13 @@ class AppOptions(object):
     models: [str] = [] # a list of model names
     api_doc: bool = False
     nested: bool = False
+    force: bool = False
 
-    def __init__(self, models=[], api_doc=False, nested=False):
+    def __init__(self, models=[], api_doc=False, nested=False, force=False):
         self.models = models
         self.api_doc = api_doc
         self.nested = nested
+        self.force = force
 
 
 class AppConfig(object):

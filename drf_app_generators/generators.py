@@ -237,7 +237,7 @@ class BaseGenerator(object):
 
         for model_meta in self.app_config.models_meta:
             content = getattr(self, f'{group_name}_content')(model_meta=model_meta)
-            filename = f'{group_name}/{model_meta.name}.py'
+            filename = f'{group_name}/{model_meta.verbose_name_plural}.py'
             self._generate_file_template(filename, content)
 
     def _generate_single_view(self, name):
@@ -283,7 +283,7 @@ class BaseGenerator(object):
             content = str()
 
         file_path = os.path.join(base_dir, filename)
-        if os.path.exists(file_path) and not self.app_config.force:
+        if os.path.exists(file_path) and not self.app_config.options.force:
             msg = f'Are you sure to override {filename} ? (y/n)'
             prompt = input
             response = prompt(msg)

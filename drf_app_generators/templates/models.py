@@ -35,5 +35,5 @@ class {{ model_meta.object_name }}(TimeStampedModel):
     objects = {{ model_meta.object_name }}QuerySet.as_manager()
 """
 
-MODEL_INIT = """{% for model in models %}from {{ app_name }}.models.{{ model.name }} import {{ model.object_name }}
+MODEL_INIT = """{% for model in models %}from {{ app_name }}.models.{{ model.verbose_name_plural }} import {{ model.object_name }}
 {% endfor %}"""

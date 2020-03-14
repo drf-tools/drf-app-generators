@@ -2,6 +2,7 @@ import os
 import shutil
 from django.core.management import call_command
 from django.test import TestCase
+import time
 
 
 class GeneratorsTestCase(TestCase):
@@ -11,15 +12,20 @@ class GeneratorsTestCase(TestCase):
 
     def tearDown(self):
         super().tearDown()
-        shutil.rmtree(os.path.join(self.cwd, 'books'))
+
+        if os.path.exists(os.path.join(self.cwd, 'books')):
+            shutil.rmtree(os.path.join(self.cwd, 'books'))
+        if os.path.exists(os.path.join(self.cwd, 'foo')):
+            shutil.rmtree(os.path.join(self.cwd, 'foo'))
+        if os.path.exists(os.path.join(self.cwd, 'bar')):
+            shutil.rmtree(os.path.join(self.cwd, 'bar'))
 
     def test_generate_quick_app(self):
-        args = [
-            'book',
-        ]
-        opts = {}
-
-        call_command('generate', *args, **opts)
+        call_command(
+            'generate',
+            'books',
+            force=True,
+        )
 
         app_folder = os.path.join(self.cwd, 'books')
         self.assertEqual(
@@ -56,16 +62,14 @@ class GeneratorsTestCase(TestCase):
         )
 
     def test_generate_full_app(self):
-        args = [
-            'book',
-            '--models',
-            'Book,Author'
-        ]
-        opts = {}
+        call_command(
+            'generate',
+            'foo',
+            models='Book,Author',
+            force=True,
+        )
 
-        call_command('generate', *args, **opts)
-
-        app_folder = os.path.join(self.cwd, 'books')
+        app_folder = os.path.join(self.cwd, 'foo')
         self.assertEqual(
             os.path.exists(app_folder), True)
         self.assertEqual(
@@ -99,18 +103,17 @@ class GeneratorsTestCase(TestCase):
             os.path.isfile(os.path.join(app_folder, 'serializers.py')), True
         )
 
-    def test_generate_full_app_expand(self):
-        args = [
-            'book',
-            '--models',
-            'Book,Author,Category',
-            '--expand',
-        ]
-        opts = {}
+    def test_generate_nested_app(self):
+        app_folder = os.path.join(self.cwd, 'bar')
 
-        call_command('generate', *args, **opts)
+        call_command(
+            'generate',
+            'bar',
+            models='Book,Author,Category',
+            nested=True,
+            force=True,
+        )
 
-        app_folder = os.path.join(self.cwd, 'books')
         self.assertEqual(
             os.path.exists(app_folder), True)
         self.assertEqual(
