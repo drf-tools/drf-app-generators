@@ -1,67 +1,67 @@
 __all__ = ['APIS_VIEW', 'API_VIEW', 'API_INIT']
 
 APIS_VIEW = """from drf_core import apis
-from {{ app }}.models import ({% for model in models %}
-    {{ model }},{% endfor %}
+from {{ app_name }}.models import ({% for model in models %}
+    {{ model.object_name }},{% endfor %}
 )
-from {{ app }}.serializers import ({% for model in models %}
-    {{ model }}Serializer,{% endfor %}
+from {{ app_name }}.serializers import ({% for model in models %}
+    {{ model.object_name }}Serializer,{% endfor %}
 )
-from {{ app }}.filters import ({% for model in models %}
-    {{ model }}Filtering,{% endfor %}
+from {{ app_name }}.filters import ({% for model in models %}
+    {{ model.object_name }}Filtering,{% endfor %}
 )
-{% for resource in resources %}
+{% for model in models %}
 
 # =============================================================================
-# {{ resource.model }}
+# {{ model.object_name }}
 # =============================================================================
-class {{ resource.model }}ViewSet(apis.BaseViewSet):
-    # {{ resource.model }} ViewSet
+class {{ model.object_name }}ViewSet(apis.BaseViewSet):
+    # {{ model.object_name }} ViewSet
 
-    queryset = {{ resource.model }}.objects.non_archived_only()
-    serializer_class = {{ resource.model }}Serializer
-    filter_class = {{ resource.model }}Filtering
+    queryset = {{ model.object_name }}.objects.non_archived_only()
+    serializer_class = {{ model.object_name }}Serializer
+    filter_class = {{ model.object_name }}Filtering
     http_method_names = ['get', 'post', 'put', 'patch', 'delete',]
     ordering_fields = '__all__'
     search_fields = []
 
-    resource_name = '{{ resource.name }}'
+    resource_name = '{{ model.verbose_name_plural }}'
 {% endfor %}
 
-apps = [{% for resource in resources %}
-    {{ resource.model }}ViewSet,{% endfor %}
+apps = [{% for model in models %}
+    {{ model.object_name }}ViewSet,{% endfor %}
 ]
 """
 
 API_VIEW = """from drf_core import apis
-from {{ app }}.models import {{ resource.model }}
-from {{ app }}.serializers import {{ resource.model }}Serializer
-from {{ app }}.filters import {{ resource.model }}Filtering
+from {{ app_name }}.models import {{ model_meta.object_name }}
+from {{ app_name }}.serializers import {{ model_meta.object_name }}Serializer
+from {{ app_name }}.filters import {{ model_meta.object_name }}Filtering
 
 # =============================================================================
-# {{ resource.model }}
+# {{ model_meta.object_name }}
 # =============================================================================
-class {{ resource.model }}ViewSet(apis.BaseViewSet):
-    # {{ resource.model }} ViewSet
+class {{ model_meta.object_name }}ViewSet(apis.BaseViewSet):
+    # {{ model_meta.object_name }} ViewSet
 
-    queryset = {{ resource.model }}.objects.non_archived_only()
-    serializer_class = {{ resource.model }}Serializer
-    filter_class = {{ resource.model }}Filtering
+    queryset = {{ model_meta.object_name }}.objects.non_archived_only()
+    serializer_class = {{ model_meta.object_name }}Serializer
+    filter_class = {{ model_meta.object_name }}Filtering
     http_method_names = ['get', 'post', 'put', 'patch', 'delete',]
     ordering_fields = '__all__'
     search_fields = []
 
-    resource_name = '{{ resource.name }}'
+    resource_name = '{{ model_meta.verbose_name_plural }}'
 
 apps = [
-    {{ resource.model }}ViewSet,
+    {{ model_meta.object_name }}ViewSet,
 ]
 """
 
-API_INIT = """{% for resource in resources %}from {{ app }}.apis.{{ resource.name }} import {{ resource.model }}ViewSet
+API_INIT = """{% for model in models %}from {{ app_name }}.apis.{{ model.verbose_name_plural }} import {{ model.object_name }}ViewSet
 {% endfor %}
 
-apps = [{% for resource in resources %}
-    {{ resource.model }}ViewSet,{% endfor %}
+apps = [{% for model in models %}
+    {{ model.object_name }}ViewSet,{% endfor %}
 ]
 """

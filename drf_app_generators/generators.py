@@ -26,28 +26,28 @@ INIT_FILENAME = '__init__.py'
 class BaseGenerator(object):
     def __init__(self, app_config, force=False):
         self.app_config = app_config
-        self.app_name = app_config['app_name']
-        self.app_name_plural = app_config['app_name_plural']
-        self.resources = app_config['resources']
-        self.is_expand = app_config['is_expand']
-        self.force = force
-        self.base_dir = os.path.join(os.getcwd())
-        self.models = self._get_model_names()
+        self.options = app_config.options
+        # self.app_name = app_config['app_name']
+        # self.app_name_plural = app_config['app_name_plural']
+        # self.resources = app_config['resources']
+        # self.is_expand = app_config['is_expand']
+        # self.force = force
+        # self.base_dir = os.path.join(os.getcwd())
+        # self.models = self._get_model_names()
 
         if settings.BASE_DIR:
             self.base_dir = os.path.join(settings.BASE_DIR)
 
         self.context = Context({
-            'app': self.app_name_plural,
-            'app_name': self.app_name, # This is singular app name.
-            'models': self.models,
-            'resources': self.resources
+            'app_name': self.app_config.name, # This is singular app name.
+            'models': self.app_config.models_meta,
         })
+
     #--------------------------------------------------
     # Generate files
     #--------------------------------------------------
     def generate_models(self):
-        if self.is_expand:
+        if self.app_config.options.nested:
             # generate init view
             self._generate_by_group(group_name='models', init_view=MODEL_INIT)
         else:
@@ -59,7 +59,7 @@ class BaseGenerator(object):
         self._generate_file_template(filename, content)
 
     def generate_apis(self):
-        if self.is_expand:
+        if self.options.nested:
             self._generate_by_group(
                 group_name='apis',
                 init_view=API_INIT)
@@ -67,7 +67,7 @@ class BaseGenerator(object):
             self._generate_single_view(name='apis')
 
     def generate_factories(self):
-        if self.is_expand:
+        if self.options.nested:
             self._generate_by_group(
                 group_name='factories',
                 init_view=FACTORY_INIT)
@@ -75,7 +75,7 @@ class BaseGenerator(object):
             self._generate_single_view(name='factories')
 
     def generate_serializers(self):
-        if self.is_expand:
+        if self.options.nested:
             self._generate_by_group(
                 group_name='serializers',
                 init_view=SERIALIZER_INIT)
@@ -103,9 +103,9 @@ class BaseGenerator(object):
             os.path.join(self.base_dir, 'models'),
             init=True,
         )
-        for model in self.models:
-            content = self.test_model_content(model=model)
-            filename = f'models/test_{model.lower()}_models.py'
+        for model_meta in self.app_config.models_meta:
+            content = self.test_model_content(model_meta=model_meta)
+            filename = f'models/test_{model_meta.name}_models.py'
             self._generate_file_template(filename, content)
 
     def generate_test_apis(self):
@@ -114,9 +114,9 @@ class BaseGenerator(object):
             os.path.join(self.base_dir, 'apis'),
             init=True,
         )
-        for resource in self.resources:
-            content = self.test_api_content(resource=resource)
-            filename = f'apis/test_{resource["model"].lower()}_apis.py'
+        for model_meta in self.app_config.models_meta:
+            content = self.test_api_content(model_meta=model_meta)
+            filename = f'apis/test_{model_meta.name}_apis.py'
             self._generate_file_template(filename, content)
 
     def generate_tests(self):
@@ -127,23 +127,30 @@ class BaseGenerator(object):
         """
         Generate API doc based on template.
         """
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        # Create API docs folder.
         self.create_folder(self.base_dir)
 
-        for resource in self.resources:
-            content = self.apidoc_content(resource=resource)
-            filename = f'{resource["name"]}.md'
+        # Create folder for app.
+        self.base_dir = os.path.join(
+            self.base_dir, self.app_config.name)
+
+        # Create API docs folder.
+        self.create_folder(self.base_dir)
+
+        for model_meta in self.app_config.models_meta:
+            content = self.apidoc_content(model_meta=model_meta)
+            filename = f'{model_meta.verbose_name_plural}.md'
             self._generate_file_template(filename, content)
 
     #--------------------------------------------------
     # Get contents
     #--------------------------------------------------
-    def get_grouping_content(self, resource, view):
+    def get_grouping_content(self, model_meta, view):
         context = self.context
-        if resource is not None:
+        if model_meta is not None:
             context = Context({
-                'app': self.app_name_plural,
-                'resource': resource,
+                'app_name': self.app_config.name,
+                'model_meta': model_meta,
             })
             self.view_template = Template(view)
 
@@ -153,30 +160,30 @@ class BaseGenerator(object):
         self.view_template = Template(init_view)
         return self._view_template_content()
 
-    def models_content(self, resource=None):
-        if resource is not None:
-            return self.get_grouping_content(resource=resource, view=MODEL_VIEW)
+    def models_content(self, model_meta=None):
+        if model_meta is not None:
+            return self.get_grouping_content(model_meta=model_meta, view=MODEL_VIEW)
         return self._view_template_content()
 
     def app_config_content(self):
         return self._view_template_content()
 
-    def apis_content(self, resource=None):
-        if resource is not None:
-            return self.get_grouping_content(resource=resource, view=API_VIEW)
+    def apis_content(self, model_meta=None):
+        if model_meta is not None:
+            return self.get_grouping_content(
+                model_meta=model_meta, view=API_VIEW)
         return self._view_template_content()
 
-    def factories_content(self, resource=None):
-        if resource is not None:
-            return self.get_grouping_content(resource=resource, view=FACTORY_VIEW)
+    def factories_content(self, model_meta=None):
+        if model_meta is not None:
+            return self.get_grouping_content(
+                model_meta=model_meta, view=FACTORY_VIEW)
         return self._view_template_content()
 
-    def serializers_content(self, resource=None):
-        if resource is not None:
-            return self.get_grouping_content(resource=resource, view=SERIALIZER_VIEW)
-        return self._view_template_content()
-
-    def serializer_content(self):
+    def serializers_content(self, model_meta=None):
+        if model_meta is not None:
+            return self.get_grouping_content(
+                model_meta=model_meta, view=SERIALIZER_VIEW)
         return self._view_template_content()
 
     def admin_content(self):
@@ -188,27 +195,26 @@ class BaseGenerator(object):
     def permissions_content(self):
         return self._view_template_content()
 
-    def test_model_content(self, model):
+    def test_model_content(self, model_meta):
         context = Context({
-            'app': self.app_name_plural,
-            'model': model,
+            'app_name': self.app_config.name,
+            'model_meta': model_meta,
         })
         self.view_template = Template(TEST_MODEL_VIEW)
         return self._view_template_content(context=context)
 
-    def test_api_content(self, resource):
+    def test_api_content(self, model_meta):
         context = Context({
-            'app': self.app_name_plural,
-            'model': resource['model'],
-            'resource': resource
+            'app_name': self.app_config.name,
+            'model_meta': model_meta,
         })
         self.view_template = Template(TEST_API_VIEW)
         return self._view_template_content(context=context)
 
-    def apidoc_content(self, resource=None):
+    def apidoc_content(self, model_meta=None):
         context = Context({
-            'app': self.app_name_plural,
-            'resource': resource,
+            'app': self.app_config.name,
+            'model_meta': model_meta,
         })
         self.view_template = Template(APIDOC_VIEW)
         return self._view_template_content(context=context)
@@ -229,9 +235,9 @@ class BaseGenerator(object):
             self._generate_file_template(
                 filename=f'{group_name}/__init__.py', content=content)
 
-        for resource in self.resources:
-            content = getattr(self, f'{group_name}_content')(resource=resource)
-            filename = f'{group_name}/{resource["name"]}.py'
+        for model_meta in self.app_config.models_meta:
+            content = getattr(self, f'{group_name}_content')(model_meta=model_meta)
+            filename = f'{group_name}/{model_meta.name}.py'
             self._generate_file_template(filename, content)
 
     def _generate_single_view(self, name):
@@ -256,12 +262,14 @@ class BaseGenerator(object):
 
     def create_folder(self, folder_name, force=False, init=False):
         folder_path = os.path.join(self.base_dir, folder_name)
-        Path(folder_path).mkdir(parents=False, exist_ok=force)
+
+        if not os.path.exists(folder_path):
+            Path(folder_path).mkdir(parents=False, exist_ok=force)
 
         if init:
             # create __init__.py file for this folder.
             self.write_file(
-                content='',
+                content=None,
                 filename='__init__.py',
                 base_dir=folder_path,
             )
@@ -270,8 +278,12 @@ class BaseGenerator(object):
         if base_dir is None:
             base_dir = self.base_dir
 
+        if content is None:
+            # Make sure that contain is an empty string if it's None.
+            content = str()
+
         file_path = os.path.join(base_dir, filename)
-        if os.path.exists(file_path) and not self.force:
+        if os.path.exists(file_path) and not self.app_config.force:
             msg = f'Are you sure to override {filename} ? (y/n)'
             prompt = input
             response = prompt(msg)
@@ -288,38 +300,28 @@ class AppFolderGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(AppFolderGenerator, self).__init__(app_config, force)
 
-        self.create_folder(self.app_name_plural)
+        self.create_folder(self.app_config.name)
         self.write_file(
             content=INIT_FILE,
             filename=INIT_FILENAME,
-            base_dir=os.path.join(self.base_dir, self.app_name_plural),
+            base_dir=os.path.join(self.base_dir, self.app_config.name),
         )
 
 
 class MigrationFolderGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(MigrationFolderGenerator, self).__init__(app_config, force)
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.base_dir = os.path.join(self.base_dir, self.app_config.name)
 
-        self.create_folder('migrations')
-        self.write_file(
-            content='',
-            filename=INIT_FILENAME,
-            base_dir=os.path.join(self.base_dir, 'migrations'),
-        )
+        self.create_folder('migrations', init=True)
 
 
 class TestFolderGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(TestFolderGenerator, self).__init__(app_config, force)
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.base_dir = os.path.join(self.base_dir, self.app_config.name)
 
-        self.create_folder('tests')
-        self.write_file(
-            content='',
-            filename=INIT_FILENAME,
-            base_dir=os.path.join(self.base_dir, 'tests'),
-        )
+        self.create_folder('tests', init=True)
 
 
 class ModelGenerator(BaseGenerator):
@@ -327,7 +329,7 @@ class ModelGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(ModelGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(MODELS_VIEW)
         self.generate_models()
 
@@ -337,7 +339,7 @@ class AppConfigGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(AppConfigGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(APP_VIEW)
         self.generate_app_config()
 
@@ -347,7 +349,7 @@ class ApiGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(ApiGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(APIS_VIEW)
         self.generate_apis()
 
@@ -357,7 +359,7 @@ class FactoryGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(FactoryGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(FACTORIES_VIEW)
         self.generate_factories()
 
@@ -367,7 +369,7 @@ class SerializerGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(SerializerGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(SERIALIZERS_VIEW)
         self.generate_serializers()
 
@@ -377,7 +379,7 @@ class AdminGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(AdminGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(ADMIN_VIEW)
         self.generate_admin()
 
@@ -386,7 +388,8 @@ class FilterGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(FilterGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.base_dir = os.path.join(
+            self.base_dir, self.app_config.name)
         self.view_template = Template(FILTER_VIEW)
         self.generate_filters()
 
@@ -396,7 +399,8 @@ class PermissionGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(PermissionGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural)
+        self.base_dir = os.path.join(
+            self.base_dir, self.app_config.name)
         self.view_template = Template(PERMISSION_VIEW)
         self.generate_permissions()
 
@@ -406,7 +410,8 @@ class UnitTestGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(UnitTestGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, self.app_name_plural, 'tests')
+        self.base_dir = os.path.join(
+            self.base_dir, self.app_config.name, 'tests')
         self.generate_tests()
 
 
@@ -415,5 +420,7 @@ class ApidocGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
         super(ApidocGenerator, self).__init__(app_config, force)
 
-        self.base_dir = os.path.join(self.base_dir, '../doc')
-        self.generate_apidoc()
+        if self.app_config is not None \
+            and self.app_config.options.api_doc:
+            self.base_dir = os.path.join(self.base_dir, '../doc')
+            self.generate_apidoc()

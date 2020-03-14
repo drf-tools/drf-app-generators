@@ -1,9 +1,9 @@
 __all__ = ['APIDOC_VIEW']
 
-APIDOC_VIEW = """# {{ resource.name|capfirst }} APIs
-## GET /api/v1/{{ resource.name }}/
+APIDOC_VIEW = """# {{ model_meta.verbose_name_plural|capfirst }} APIs
+## GET /api/v1/{{ model_meta.verbose_name_plural }}/
 -----------------------------------
-Get a list of {{ resource.name }}
+Get a list of {{ model_meta.verbose_name_plural }}
 ### Request Parameters
 | Fields   | Description            |
 |----------|------------------------|
@@ -14,7 +14,7 @@ Get a list of {{ resource.name }}
 ##### Request
 ```
 curl -X GET \\
-    http://localhost:8000/api/v1/{{ resource.name }}/?limit=20&offset=0 \\
+    http://localhost:8000/api/v1/{{ model_meta.verbose_name_plural }}/?limit=20&offset=0 \\
     -H 'authorization: Basic YWRtaW46MTIzNDU2' \\
     -H 'cache-control: no-cache'
 ```
@@ -28,9 +28,9 @@ curl -X GET \\
 |-------|------------------|
 | 200   | OK |
 
-## POST /api/v1/{{ resource.name }}/
+## POST /api/v1/{{ model_meta.verbose_name_plural }}/
 -----------------------------------
-Create new {{ resource.name }}
+Create new {{ model_meta.verbose_name_plural }}
 ### Request Parameters
 None
 
@@ -42,7 +42,7 @@ None
 ##### Request
 ```
 curl -X POST \\
-    http://localhost:8000/api/v1/{{ resource.name }}/?limit=20&offset=0 \\
+    http://localhost:8000/api/v1/{{ model_meta.verbose_name_plural }}/?limit=20&offset=0 \\
     -H 'authorization: Basic YWRtaW46MTIzNDU2' \\
     -H 'cache-control: no-cache' \\
     -H 'content-type: application/json' \\
@@ -58,9 +58,9 @@ curl -X POST \\
 |-------|------------------|
 | 201   | Created |
 
-## PUT /api/v1/{{ resource.name }}/:id/
+## PUT /api/v1/{{ model_meta.verbose_name_plural }}/:id/
 -----------------------------------
-Update {{ resource.name }} record by ID
+Update {{ model_meta.verbose_name_plural }} record by ID
 ### Request Parameters
 None
 
@@ -72,7 +72,7 @@ None
 ##### Request
 ```
 curl -X POST \
-    http://localhost:8000/api/v1/{{ resource.name }}/1/?limit=20&offset=0 \\
+    http://localhost:8000/api/v1/{{ model_meta.verbose_name_plural }}/1/?limit=20&offset=0 \\
     -H 'authorization: Basic YWRtaW46MTIzNDU2' \\
     -H 'cache-control: no-cache' \\
     -H 'content-type: application/json' \\
@@ -88,9 +88,9 @@ curl -X POST \
 |-------|------------------|
 | 200   | OK |
 
-## DELETE /api/v1/{{ resource.name }}/:id/
+## DELETE /api/v1/{{ model_meta.verbose_name_plural }}/:id/
 ----------------------------------------------
-Remove {{ resource.name }} record by ID
+Remove {{ model_meta.verbose_name_plural }} record by ID
 ### Request Parameters
 None
 
@@ -101,7 +101,7 @@ None
 ##### Request
 ```
 curl -X POST \\
-    http://localhost:8000/api/v1/{{ resource.name }}/1/?limit=20&offset=0 \\
+    http://localhost:8000/api/v1/{{ model_meta.verbose_name_plural }}/1/?limit=20&offset=0 \\
     -H 'authorization: Basic YWRtaW46MTIzNDU2' \\
     -H 'cache-control: no-cache'
 ```

@@ -22,6 +22,7 @@ from drf_app_generators.generators import (
     ApidocGenerator,
 )
 from drf_app_generators.helpers import pluralize
+from drf_app_generators.meta import AppConfig, AppOptions
 
 
 class Command(BaseCommand):
@@ -49,29 +50,21 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print('::generate::')
         models = []
-        resources = []
-        is_expand = False
+        nested = False
+        apidoc = False
 
         if options['models']:
             models = options['models'].split(',')
 
         if options['nested']:
-            is_expand = True
+            nested = True
 
-        for model in models:
-            resource = {
-                'model': model,
-                'name': pluralize(model).lower(),
-            }
-            resources.append(resource)
+        if options['apidoc']:
+            apidoc = True
 
-        app_config = {
-            'app_name': options['app_name'],
-            'app_name_plural': pluralize(options['app_name']),
-            'models': models,
-            'resources': resources, # resources are plural of models, for the apis.
-            'is_expand': is_expand,
-        }
+        app_options = AppOptions(
+            models=models, api_doc=apidoc, nested=nested)
+        app_config = AppConfig(name=options['app_name'], options=app_options)
 
         # Create folders for app.
         AppFolderGenerator(app_config)
@@ -86,6 +79,4 @@ class Command(BaseCommand):
         UnitTestGenerator(app_config)
         FilterGenerator(app_config)
         PermissionGenerator(app_config)
-
-        if options['apidoc']:
-            ApidocGenerator(app_config)
+        ApidocGenerator(app_config)

@@ -1,44 +1,44 @@
 __all__ = ['FACTORY_VIEW', 'FACTORIES_VIEW', 'FACTORY_INIT']
 
 FACTORIES_VIEW = """from drf_core import factories
-from {{ app }}.models import ({% for model in models %}
-    {{ model }},{% endfor %}
+from {{ app_name }}.models import ({% for model in models %}
+    {{ model.object_name }},{% endfor %}
 )
 {% for model in models %}
 
 # =============================================================================
-# {{ model }}
+# {{ model.object_name }}
 # =============================================================================
-class {{ model }}Factory(factories.ModelFactory):
-    # Factory data for {{ model }} model.
+class {{ model.object_name }}Factory(factories.ModelFactory):
+    # Factory data for {{ model.object_name }} model.
 
     class Meta:
-        model = {{ model }}
+        model = {{ model.object_name }}
 {% endfor %}
 
 apps = [{% for model in models %}
-    {{ model }}Factory,{% endfor %}
+    {{ model.object_name }}Factory,{% endfor %}
 ]
 """
 
 FACTORY_VIEW = """from drf_core import factories
-from {{ app }}.models.{{ resource.name }} import {{ resource.model }}
+from {{ app_name }}.models.{{ model_meta.verbose_name_plural }} import {{ model_meta.object_name }}
 
 
 # =============================================================================
-# {{ resource.model }}
+# {{ model_meta.object_name }}
 # =============================================================================
-class {{ resource.model }}Factory(factories.ModelFactory):
-    # Factory data for {{ resource.model }} model.
+class {{ model_meta.object_name }}Factory(factories.ModelFactory):
+    # Factory data for {{ model_meta.object_name }} model.
 
     class Meta:
-        model = {{ resource.model }}
+        model = {{ model_meta.object_name }}
 
 
 apps = [
-    {{ resource.model }}Factory
+    {{ model_meta.object_name }}Factory
 ]
 """
 
-FACTORY_INIT = """{% for resource in resources %}from {{ app }}.factories.{{ resource.name }} import {{ resource.model }}Factory
+FACTORY_INIT = """{% for model in models %}from {{ app_name }}.factories.{{ model.verbose_name_plural }} import {{ model.object_name }}Factory
 {% endfor %}"""
