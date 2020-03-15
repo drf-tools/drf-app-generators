@@ -1,6 +1,8 @@
 __all__ = ['FACTORY_VIEW', 'FACTORIES_VIEW', 'FACTORY_INIT']
 
-FACTORIES_VIEW = """from drf_core import factories
+FACTORIES_VIEW = """import datetime
+
+from drf_core import factories
 from {{ app_name }}.models import ({% for model in models %}
     {{ model.object_name }},{% endfor %}
 )
@@ -21,7 +23,9 @@ apps = [{% for model in models %}
 ]
 """
 
-FACTORY_VIEW = """from drf_core import factories
+FACTORY_VIEW = """import datetime
+
+from drf_core import factories
 from {{ app_name }}.models.{{ model_meta.verbose_name_plural }} import {{ model_meta.object_name }}
 
 
@@ -30,7 +34,8 @@ from {{ app_name }}.models.{{ model_meta.verbose_name_plural }} import {{ model_
 # =============================================================================
 class {{ model_meta.object_name }}Factory(factories.ModelFactory):
     # Factory data for {{ model_meta.object_name }} model.
-
+    {% for field in model_meta.fields %}{% if field.factory.code_line %}{% autoescape off %}{{ field.factory.code_line }}
+    {% endautoescape %}{% endif %}{% endfor %}
     class Meta:
         model = {{ model_meta.object_name }}
 

@@ -41,8 +41,14 @@ class FieldMeta(object):
     # custom fields
     field_type = None # Get from class of django.field
     field_type_string = None
+
+    # from validators
     min_value = None
     max_value = None
+
+    # for Decimal fields
+    decimal_places: [int] = 0
+    max_digits: [int] = 20
 
     factory = None
 
@@ -67,11 +73,15 @@ class FieldMeta(object):
         self.one_to_one = self.django_field.one_to_one
         self.max_length = self.django_field.max_length
 
+        if self.field_type_string == 'DecimalField':
+            self.decimal_places = self.django_field.decimal_places
+            self.max_digits = self.django_field.max_digits
+
         # get validators
         for validator in self.django_field.validators:
-            if validator.code == 'min_value':
+            if hasattr(validator, 'code') and validator.code == 'min_value':
                 self.min_value = validator.limit_value
-            elif validator.code == 'max_value':
+            elif hasattr(validator, 'code') and validator.code == 'max_value':
                 self.max_value = validator.limit_value
 
 
@@ -80,17 +90,19 @@ class ModelMeta(object):
     This class holds meta data of a model, attributes,
     and fields.
     """
-    model = None # This is Django model.
-    name = None # For example: book
-    verbose_name_plural = None # For example: books
-    object_name = None # the class name of model. Example: Book
-    app_label = None # For example: books
-    fields = []
-    django_fields = []
-    abstract = False
+    model: object = None # This is Django model.
+    name: str = None # For example: book
+    verbose_name_plural: str = None # For example: books
+    object_name: str = None # the class name of model. Example: Book
+    app_label: str = None # For example: books
+    fields: [object] = []
+    django_fields: [object] = []
+    abstract: bool = False
 
     def __init__(self, model=None):
         self.model = model
+        self.fields = []
+        self.django_fields = []
 
     def build_from_name(self, name=None):
         """
@@ -161,10 +173,16 @@ class FactoryMeta(object):
             self.generate_boolean_field_code()
         elif field_type in FACTORY_TEXT_FIELDS:
             self.generate_text_field_code()
+        elif field_type == 'DecimalField':
+            self.generate_decimal_field_code()
+        elif field_type == 'DateField':
+            self.generate_date_field_code()
+        elif field_type == 'DateTimeField':
+            self.generate_date_time_field_code()
 
     def generate_char_field_code(self):
         # using sequence as default
-        self.code_line = '{} = factory.Sequence(lambda n: \'{} {} %03d\' % n)' \
+        self.code_line = '{} = factories.Sequence(lambda n: \'{} {} %03d\' % n)' \
             .format(self.field.name, self.model.object_name, self.field.name)
 
         print(self.code_line)
@@ -173,23 +191,39 @@ class FactoryMeta(object):
         min_value = self.field.min_value if self.field.min_value is not None else 0
         max_value = self.field.max_value if self.field.max_value is not None else 1000
 
-        self.code_line = '{} = factory.fuzzy.FuzzyInteger({}, {})' \
+        self.code_line = '{} = factories.FuzzyInteger({}, {})' \
             .format(self.field.name, min_value, max_value)
 
     def generate_float_field_code(self):
         min_value = self.field.min_value if self.field.min_value is not None else 0.00
         max_value = self.field.max_value if self.field.max_value is not None else 1000.00
 
-        self.code_line = '{} = factory.fuzzy.FuzzyFloat({}, {})' \
+        self.code_line = '{} = factories.FuzzyFloat({}, {})' \
             .format(self.field.name, min_value, max_value)
 
     def generate_boolean_field_code(self):
-        self.code_line = '{} = factory.Faker(\'pybool\')' \
+        self.code_line = '{} = factories.Faker(\'pybool\')' \
             .format(self.field.name)
 
     def generate_text_field_code(self):
-        self.code_line = '{} = factory.Faker(\'sentence\', nb_words=10)' \
+        self.code_line = '{} = factories.Faker(\'sentence\', nb_words=10)' \
             .format(self.field.name)
+
+    def generate_decimal_field_code(self):
+        min_value = self.field.min_value if self.field.min_value is not None else 0.00
+        max_value = self.field.max_value if self.field.max_value is not None else 1000.00
+        self.code_line = '{} = factories.FuzzyDecimal({}, {}, {})' \
+            .format(self.field.name, min_value, max_value, self.field.decimal_places)
+
+    def generate_date_field_code(self):
+        self.code_line = '{} = factories.FuzzyDate(datetime.date(2020, 1, 1))' \
+            .format(self.field.name)
+
+    def generate_date_time_field_code(self):
+        self.code_line = '''{} = factories.FuzzyDateTime(
+        datetime.datetime(2020, 1, 1),
+        tzinfo=datetime.tzinfo(\'UTC\'),
+    )'''.format(self.field.name)
 
 
 class AppOptions(object):
@@ -216,10 +250,12 @@ class AppConfig(object):
     models_meta: [ModelMeta] = []
     force: bool = False # force to override.
 
-    def __init__(self, name=None, options=None):
+    def __init__(self, name=None, options=None, init=True):
         self.name = name
         self.name_capitalized = self.name.capitalize()
         self.options = options
+        self.init = init # Init app the first time.
+        self.models_meta = []
 
         self._build_models_meta()
 
