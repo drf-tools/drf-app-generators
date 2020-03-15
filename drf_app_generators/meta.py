@@ -50,10 +50,17 @@ class FieldMeta(object):
     decimal_places: [int] = 0
     max_digits: [int] = 20
 
+    # related model
+    related_model: [object] = None
+    related_model_meta: [object] = None
+
+    # Factory meta if has.
     factory = None
 
     def __init__(self, django_field=None):
         self.django_field = django_field
+        self.related_model = None
+        self.related_model_meta = None
 
     def get_meta(self):
         self.field_type = type(self.django_field)
@@ -74,8 +81,12 @@ class FieldMeta(object):
         self.max_length = self.django_field.max_length
 
         if self.field_type_string == 'DecimalField':
+            # get decimal attributes
             self.decimal_places = self.django_field.decimal_places
             self.max_digits = self.django_field.max_digits
+
+        if self.field_type_string == 'ForeignKey':
+            self.related_model = self.django_field.remote_field.model
 
         # get validators
         for validator in self.django_field.validators:
@@ -99,10 +110,18 @@ class ModelMeta(object):
     django_fields: [object] = []
     abstract: bool = False
 
+    # Require libs for factory
+    factory_required_libs: [str] = []
+    factory_required_modules: [str] = []
+
     def __init__(self, model=None):
         self.model = model
         self.fields = []
         self.django_fields = []
+        self.factory_required_libs = []
+        self.factory_required_modules = []
+
+        self.get_meta()
 
     def build_from_name(self, name=None):
         """
@@ -133,12 +152,26 @@ class ModelMeta(object):
             field = FieldMeta(django_field=django_field)
             field.get_meta()
 
+            # check if field has a related model.
+            if field.related_model is not None:
+                field.related_model_meta = ModelMeta(model=field.related_model)
+
             # Add factory code
             factory = FactoryMeta(field=field, model=self)
             factory.generate_code()
             field.factory = factory
 
+            # add required modules and libs
+            self.factory_required_libs += factory.import_libs
+            self.factory_required_modules += factory.required_factories
+
             self.fields.append(field)
+
+        # make the lists unique
+        self.factory_required_libs = list(
+            dict.fromkeys(self.factory_required_libs))
+        self.factory_required_modules = list(
+            dict.fromkeys(self.factory_required_modules))
 
         return self
 
@@ -149,11 +182,16 @@ class FactoryMeta(object):
 
     Supported field type: Text, CharField, Integer, Float, Boolean.
     """
-    code_line = None
+    code_line: str = None
+    import_libs: [str] = []
+    required_models: [str] = []
 
     def __init__(self, field=None, model=None):
         self.field = field
         self.model = model
+        self.code_line = None
+        self.import_libs = []
+        self.required_factories = []
 
     def generate_code(self):
         field_name = self.field.name
@@ -176,16 +214,19 @@ class FactoryMeta(object):
         elif field_type == 'DecimalField':
             self.generate_decimal_field_code()
         elif field_type == 'DateField':
+            self.add_import_lib(lib='datetime')
             self.generate_date_field_code()
         elif field_type == 'DateTimeField':
+            self.add_import_lib(lib='datetime')
+            self.add_import_lib(lib='pytz')
             self.generate_date_time_field_code()
+        elif field_type == 'ForeignKey':
+            self.generate_foreign_key_code()
 
     def generate_char_field_code(self):
         # using sequence as default
         self.code_line = '{} = factories.Sequence(lambda n: \'{} {} %03d\' % n)' \
             .format(self.field.name, self.model.object_name, self.field.name)
-
-        print(self.code_line)
 
     def generate_integer_field_code(self):
         min_value = self.field.min_value if self.field.min_value is not None else 0
@@ -221,9 +262,39 @@ class FactoryMeta(object):
 
     def generate_date_time_field_code(self):
         self.code_line = '''{} = factories.FuzzyDateTime(
-        datetime.datetime(2020, 1, 1),
-        tzinfo=datetime.tzinfo(\'UTC\'),
+        datetime.datetime(2020, 1, 1, tzinfo=pytz.timezone(\'UTC\'))
     )'''.format(self.field.name)
+
+    def generate_foreign_key_code(self):
+        # add require factory
+        self.add_required_factory(
+            app_name=self.field.related_model_meta.app_label,
+            model_name=self.field.related_model_meta.object_name,
+        )
+
+        self.code_line = '{} = factories.SubFactory({})' \
+            .format(
+                self.field.name,
+                f'{self.field.related_model_meta.object_name}Factory'
+            )
+
+    def add_import_lib(self, lib):
+        import_line = None
+
+        if lib == 'datetime':
+            import_line = 'import datetime'
+        elif lib == 'pytz':
+            import_line = 'import pytz'
+
+        if import_line is not None and import_line not in self.import_libs:
+            self.import_libs.append(import_line)
+
+    def add_required_factory(self, app_name, model_name):
+        import_line = 'from {}.factories import {}Factory' \
+            .format(app_name, model_name)
+
+        if import_line not in self.required_factories:
+            self.required_factories.append(import_line)
 
 
 class AppOptions(object):

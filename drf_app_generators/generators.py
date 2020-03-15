@@ -1,3 +1,4 @@
+import re
 import os.path
 from pathlib import Path
 from django.template import Template, Context
@@ -154,7 +155,15 @@ class BaseGenerator(object):
             })
             self.view_template = Template(view)
 
-        return self._view_template_content(context=context)
+        # Templating content
+        content = self._view_template_content(context=context)
+
+        # Remove empty lines
+        content = re.sub(r'^\n\n', '', content)
+        content = re.sub(r'^\n', '', content)
+        content = re.sub(r'\n    \n', '\n\n', content)
+
+        return content
 
     def get_init_content(self, init_view):
         self.view_template = Template(init_view)
@@ -176,8 +185,9 @@ class BaseGenerator(object):
 
     def factories_content(self, model_meta=None):
         if model_meta is not None:
-            return self.get_grouping_content(
+            content = self.get_grouping_content(
                 model_meta=model_meta, view=FACTORY_VIEW)
+            return content
         return self._view_template_content()
 
     def serializers_content(self, model_meta=None):

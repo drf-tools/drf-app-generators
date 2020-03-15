@@ -46,8 +46,6 @@ class Command(AppCommand):
 
         for _, model in models.items():
             model_meta = ModelMeta(model=model)
-            model_meta.get_meta()
-
             models_meta.append(model_meta)
 
         app.models_meta = models_meta

@@ -23,8 +23,10 @@ apps = [{% for model in models %}
 ]
 """
 
-FACTORY_VIEW = """import datetime
-
+FACTORY_VIEW = """{% for required_lib in model_meta.factory_required_libs %}{{ required_lib }}
+{% endfor %}
+{% for required_module in model_meta.factory_required_modules %}{{ required_module }}
+{% endfor %}
 from drf_core import factories
 from {{ app_name }}.models.{{ model_meta.verbose_name_plural }} import {{ model_meta.object_name }}
 
@@ -38,12 +40,12 @@ class {{ model_meta.object_name }}Factory(factories.ModelFactory):
     {% endautoescape %}{% endif %}{% endfor %}
     class Meta:
         model = {{ model_meta.object_name }}
-
-
-apps = [
-    {{ model_meta.object_name }}Factory
-]
 """
 
 FACTORY_INIT = """{% for model in models %}from {{ app_name }}.factories.{{ model.verbose_name_plural }} import {{ model.object_name }}Factory
-{% endfor %}"""
+{% endfor %}
+
+apps = [{% for model in models %}
+    {{ model.object_name }}Factory,{% endfor %}
+]
+"""
