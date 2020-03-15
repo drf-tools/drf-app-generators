@@ -38,3 +38,4 @@ venv/
 
 .vscode/
 db.sqlite3
+tests/books/
