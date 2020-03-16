@@ -13,6 +13,8 @@ from {{ app_name }}.models import ({% for model in models %}
 # =============================================================================
 class {{ model.object_name }}Factory(factories.ModelFactory):
     # Factory data for {{ model.object_name }} model.
+    {% for field in model.fields %}{% if field.factory.code_line %}{% autoescape off %}{{ field.factory.code_line }}
+    {% endautoescape %}{% endif %}{% endfor %}
 
     class Meta:
         model = {{ model.object_name }}
