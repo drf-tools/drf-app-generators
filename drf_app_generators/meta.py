@@ -121,7 +121,8 @@ class ModelMeta(object):
         self.factory_required_libs = []
         self.factory_required_modules = []
 
-        self.get_meta()
+        if self.model:
+            self.get_meta()
 
     def build_from_name(self, name=None):
         """
@@ -328,7 +329,9 @@ class AppConfig(object):
         self.init = init # Init app the first time.
         self.models_meta = []
 
-        self._build_models_meta()
+        if self.init:
+            # Build model meta for the first time.
+            self._build_models_meta()
 
     def _build_models_meta(self):
         """

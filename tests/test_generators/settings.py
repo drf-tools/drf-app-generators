@@ -38,7 +38,6 @@ INSTALLED_APPS = (
     'rest_framework',
     'drf_app_generators',
     'api',
-    'books',
 )
 
 MIDDLEWARE_CLASSES = (
