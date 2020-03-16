@@ -28,13 +28,6 @@ class BaseGenerator(object):
     def __init__(self, app_config, force=False):
         self.app_config = app_config
         self.options = app_config.options
-        # self.app_name = app_config['app_name']
-        # self.app_name_plural = app_config['app_name_plural']
-        # self.resources = app_config['resources']
-        # self.is_expand = app_config['is_expand']
-        # self.force = force
-        # self.base_dir = os.path.join(os.getcwd())
-        # self.models = self._get_model_names()
 
         if settings.BASE_DIR:
             self.base_dir = os.path.join(settings.BASE_DIR)

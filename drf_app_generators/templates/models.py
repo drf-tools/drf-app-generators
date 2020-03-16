@@ -16,6 +16,9 @@ class {{ model.object_name }}QuerySet(QuerySet):
 class {{ model.object_name }}(TimeStampedModel):
 
     objects = {{ model.object_name }}QuerySet.as_manager()
+
+    def __str__(self):
+        return super().__str__()
 {% endfor %}"""
 
 MODEL_VIEW = """from django.db import models
@@ -33,6 +36,9 @@ class {{ model_meta.object_name }}QuerySet(QuerySet):
 class {{ model_meta.object_name }}(TimeStampedModel):
 
     objects = {{ model_meta.object_name }}QuerySet.as_manager()
+
+    def __str__(self):
+        return super().__str__()
 """
 
 MODEL_INIT = """{% for model in models %}from {{ app_name }}.models.{{ model.verbose_name_plural }} import {{ model.object_name }}

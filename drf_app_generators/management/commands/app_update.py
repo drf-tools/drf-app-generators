@@ -1,6 +1,7 @@
 from django.core.management.base import AppCommand
 from drf_app_generators.meta import AppConfig, AppOptions, ModelMeta
 from drf_app_generators.generators import (
+    AdminGenerator,
     FactoryGenerator,
 )
 
@@ -27,13 +28,6 @@ class Command(AppCommand):
     def handle_app_config(self, app_config, **options):
         models = app_config.models
         models_meta = []
-        # config = {
-        #     'app_name': app_config.name,
-        #     'app_name_plural': app_config.name,
-        #     'models': models,
-        #     'resources': resources, # resources are plural of models, for the apis.
-        #     'is_expand': is_expand,
-        # }
 
         # create app config
         app_option = AppOptions(
@@ -52,3 +46,4 @@ class Command(AppCommand):
 
         # Update Factory
         FactoryGenerator(app)
+        AdminGenerator(app)
