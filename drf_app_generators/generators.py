@@ -19,13 +19,14 @@ from drf_app_generators.templates.filters import FILTER_VIEW
 from drf_app_generators.templates.permissions import PERMISSION_VIEW
 from drf_app_generators.templates.tests import TEST_MODEL_VIEW, TEST_API_VIEW
 from drf_app_generators.templates.apidoc import APIDOC_VIEW
+from drf_app_generators.helpers import print_out_override_message
 
 
 INIT_FILENAME = '__init__.py'
 
 
 class BaseGenerator(object):
-    def __init__(self, app_config, force=False):
+    def __init__(self, app_config, force=False, update=False):
         self.app_config = app_config
         self.options = app_config.options
 
@@ -349,8 +350,11 @@ class AppConfigGenerator(BaseGenerator):
 
 class ApiGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force=False):
-        super(ApiGenerator, self).__init__(app_config, force)
+    def __init__(self, app_config, force=False, update=False):
+        super(ApiGenerator, self).__init__(app_config, force=force,update=update)
+
+        if update:
+            print_out_override_message('apis', app_config=app_config)
 
         self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(APIS_VIEW)
@@ -359,8 +363,11 @@ class ApiGenerator(BaseGenerator):
 
 class FactoryGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force=False):
+    def __init__(self, app_config, force=False, update=False):
         super(FactoryGenerator, self).__init__(app_config, force)
+
+        if update:
+            print_out_override_message('factories', app_config=app_config)
 
         self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(FACTORIES_VIEW)
@@ -369,8 +376,11 @@ class FactoryGenerator(BaseGenerator):
 
 class SerializerGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force=False):
-        super(SerializerGenerator, self).__init__(app_config, force)
+    def __init__(self, app_config, force=False, update=False):
+        super(SerializerGenerator, self).__init__(app_config, force, update=update)
+
+        if update:
+            print_out_override_message('serializers', app_config=app_config)
 
         self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(SERIALIZERS_VIEW)
@@ -379,8 +389,11 @@ class SerializerGenerator(BaseGenerator):
 
 class AdminGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force=False):
+    def __init__(self, app_config, force=False, update=False):
         super(AdminGenerator, self).__init__(app_config, force)
+
+        if update:
+            print_out_override_message('admin', app_config=app_config)
 
         self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(ADMIN_VIEW)
@@ -410,8 +423,11 @@ class PermissionGenerator(BaseGenerator):
 
 class UnitTestGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force=False):
-        super(UnitTestGenerator, self).__init__(app_config, force)
+    def __init__(self, app_config, force=False, update=False):
+        super(UnitTestGenerator, self).__init__(app_config, force, update=update)
+
+        if update:
+            print_out_override_message('tests', app_config=app_config)
 
         self.base_dir = os.path.join(
             self.base_dir, self.app_config.name, 'tests')

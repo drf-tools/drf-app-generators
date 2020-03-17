@@ -67,3 +67,21 @@ def pluralize(singular):
         suffix = 's'
     plural = root + suffix
     return plural
+
+
+def print_out_override_message(
+    component_name: str = None,
+    app_config: object = None,
+):
+    if component_name is None \
+        or app_config is None \
+        or app_config.options is None:
+        return
+
+    app_name: str = app_config.name
+
+    if app_config.options.nested \
+        and component_name in ['apis', 'tests', 'factories', 'serializers']:
+        print(f'override - {app_name}/{component_name}/*.py')
+    else:
+        print(f'override - {app_name}/{component_name}.py')
