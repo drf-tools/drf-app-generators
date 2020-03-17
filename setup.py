@@ -14,7 +14,7 @@ setup(
     long_description=README,
 
     url='https://github.com/drf-tools/drf-app-generators',
-    download_url = 'https://github.com/drf-tools/drf-app-generators',
+    download_url = 'https://github.com/drf-tools/drf-app-generators/archive/v_002.tar.gz',
     author='Huy Tran',
     author_email='huy.tranquoc@asnet.com.vn',
 
