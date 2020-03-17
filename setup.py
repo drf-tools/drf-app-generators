@@ -1,17 +1,16 @@
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 
-with open(os.path.join(os.path.dirname(__file__), 'README.md')) as readme:
-    README = readme.read()
-
-os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+f = open(os.path.join(os.path.dirname(__file__), 'README.md'))
+long_description = f.read()
+f.close()
 
 setup(
     name='drf-app-generators',
     version='0.0.2',
 
     description='Generate DRF Serializers, Views, Apis, Unit tests for your application.',
-    long_description=README,
+    long_description=long_description,
 
     url='https://github.com/drf-tools/drf-app-generators',
     download_url = 'https://github.com/drf-tools/drf-app-generators/archive/v_002.tar.gz',
