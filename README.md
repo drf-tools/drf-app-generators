@@ -67,14 +67,23 @@ When you finished adding fields to your models, you can update factories & admin
 ```bash
 $ python manage.py app_update {app} {options}
 ```
-| Options                 | Description                                                               |
-|-------------------------|---------------------------------------------------------------------------|
-|`--nested`               | Tell the update service that your app is nested                           |
-|`--force`                | Override existed files                                                    |
+| Options | Description             |
+|---------|-------------------------|
+|`--nested`| If you app is nested   |
+| `--factory`| Update your factories. |
+| `--api`| Update your APIs. |
+| `--admin`| Update your admin. |
+| `--serializer`| Update your serializers. |
+| `--unittest`| Update your unittest. |
 
 Example: Update books app we just generated.
 ```bash
-$ python manage.py app_update books --nested --force
+python manage.py app_update books \
+    --factory \
+    --admin \
+    --api \
+    --serializer \
+    --unittest
 ```
 
 ## Tests
