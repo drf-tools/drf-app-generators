@@ -53,6 +53,7 @@ class FieldMeta(object):
     # related model
     related_model: [object] = None
     related_model_meta: [object] = None
+    self_related: bool = False
 
     # Factory meta if has.
     factory = None
@@ -157,7 +158,12 @@ class ModelMeta(object):
 
             # check if field has a related model.
             if field.related_model is not None:
-                field.related_model_meta = ModelMeta(model=field.related_model)
+                if field.related_model._meta.model_name == self.name:
+                    # This is the case that a field has foreign key to itself
+                    field.related_model_meta = self
+                    field.self_related = True
+                else:
+                    field.related_model_meta = ModelMeta(model=field.related_model)
 
             # Add factory code
             factory = FactoryMeta(field=field, model=self)
@@ -269,17 +275,21 @@ class FactoryMeta(object):
     )'''.format(self.field.name)
 
     def generate_foreign_key_code(self):
-        # add require factory
-        self.add_required_factory(
-            app_name=self.field.related_model_meta.app_label,
-            model_name=self.field.related_model_meta.object_name,
-        )
-
-        self.code_line = '{} = factories.SubFactory({})' \
-            .format(
-                self.field.name,
-                f'{self.field.related_model_meta.object_name}Factory'
+        if not self.field.self_related:
+            # add require factory
+            self.add_required_factory(
+                app_name=self.field.related_model_meta.app_label,
+                model_name=self.field.related_model_meta.object_name,
             )
+
+            self.code_line = '{} = factories.SubFactory({})' \
+                .format(
+                    self.field.name,
+                    f'{self.field.related_model_meta.object_name}Factory'
+                )
+            return
+
+        self.code_line = '{} = None'.format(self.field.name)
 
     def add_import_lib(self, lib):
         import_line = None
