@@ -21,7 +21,7 @@ class {{ model.object_name }}ViewSet(apis.BaseViewSet):
     queryset = {{ model.object_name }}.objects.non_archived_only()
     serializer_class = {{ model.object_name }}Serializer
     filter_class = {{ model.object_name }}Filtering
-    http_method_names = ['get', 'post', 'put', 'patch', 'delete',]
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete', ]
     ordering_fields = '__all__'
     search_fields = []
 
