@@ -13,8 +13,8 @@ setup(
     description='Generate DRF Serializers, Views, Apis, Unit tests for your application.',
     long_description=README,
 
-    url='https://github.com/tranquochuy/drf-app-generators.git',
-    download_url = 'https://github.com/tranquochuy/drf-app-generators.git',
+    url='https://github.com/drf-tools/drf-app-generators',
+    download_url = 'https://github.com/drf-tools/drf-app-generators',
     author='Huy Tran',
     author_email='huy.tranquoc@asnet.com.vn',
 
