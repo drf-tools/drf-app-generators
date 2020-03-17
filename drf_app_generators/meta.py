@@ -131,8 +131,10 @@ class ModelMeta(object):
         """
         self.name = name.lower()
         self.verbose_name_plural = pluralize(self.name)
-        self.object_name = self.name.capitalize()
+        self.object_name = name
         self.app_label = pluralize(self.name)
+
+        print(self.object_name, name)
 
         return self
 
