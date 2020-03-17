@@ -81,4 +81,4 @@ $ python manage.py app_update books --nested --force
 A full application built with drf-generators can be found in the tests directory.
 
 ## License
-MIT License. See [LICENSE](https://github.com/drf-tools/drf-app-generators/blob/master/LICENSE).
+MIT License. See [LICENSE](./LICENSE).
