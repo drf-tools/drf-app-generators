@@ -4,32 +4,33 @@ class FieldMeta(object):
     """
 
     # From django.field
-    name = None
-    attname = None # This will be different if it is foreign key.
-    primary_key = False
-    blank = False
-    null = False
-    unique = False
+    name: str = None
+    attname: str = None # This will be different if it is foreign key.
+    primary_key: bool = False
+    blank: bool = False
+    null: bool = False
+    unique: bool = False
+    required: bool = False
     choices = None
     default = None
-    is_relation = False
-    many_to_many = False
-    many_to_one = False
-    one_to_many = False
-    one_to_one = False
-    max_length = None
+    is_relation: bool = False
+    many_to_many: bool = False
+    many_to_one: bool = False
+    one_to_many: bool = False
+    one_to_one: bool = False
+    max_length: int = None
 
     # custom fields
     field_type = None # Get from class of django.field
-    field_type_string = None
+    field_type_string: str = None
 
     # from validators
     min_value = None
     max_value = None
 
     # for Decimal fields
-    decimal_places: [int] = 0
-    max_digits: [int] = 20
+    decimal_places: int = 0
+    max_digits: int = 20
 
     # related model
     related_model: [object] = None
@@ -61,6 +62,10 @@ class FieldMeta(object):
         self.one_to_many = self.django_field.one_to_many
         self.one_to_one = self.django_field.one_to_one
         self.max_length = self.django_field.max_length
+
+        if self.blank is False and self.default is None:
+            # Mark a field as required
+            self.required = True
 
         if self.field_type_string == 'DecimalField':
             # get decimal attributes
