@@ -22,7 +22,7 @@ from drf_app_generators.generators import (
     ApidocGenerator,
 )
 from drf_app_generators.helpers import pluralize
-from drf_app_generators.meta import AppConfig, AppOptions
+from drf_app_generators.compliers.app import AppConfig, AppOptions
 
 
 class Command(BaseCommand):

@@ -1,5 +1,6 @@
 from django.core.management.base import AppCommand
-from drf_app_generators.meta import AppConfig, AppOptions, ModelMeta
+from drf_app_generators.compliers.app import AppConfig, AppOptions
+from drf_app_generators.compliers.model import ModelMeta
 from drf_app_generators.generators import (
     AdminGenerator,
     FactoryGenerator,
