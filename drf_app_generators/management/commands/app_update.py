@@ -104,7 +104,6 @@ class Command(AppCommand):
         if options['filter'] or options['all']:
             generators.append(FilterGenerator)
 
-
         # Execute the list
         for generator in generators:
             generator(app, update=True)
