@@ -401,8 +401,11 @@ class AdminGenerator(BaseGenerator):
 
 class FilterGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force=False):
+    def __init__(self, app_config, force=False, update=False):
         super(FilterGenerator, self).__init__(app_config, force)
+
+        if update:
+            print_out_override_message('filters', app_config=app_config)
 
         self.base_dir = os.path.join(
             self.base_dir, self.app_config.name)

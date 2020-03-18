@@ -6,6 +6,7 @@ from drf_app_generators.generators import (
     ApiGenerator,
     SerializerGenerator,
     UnitTestGenerator,
+    FilterGenerator,
 )
 
 
@@ -52,6 +53,11 @@ class Command(AppCommand):
             action='store_true',
             help='Override to update your unit test.',
         )
+        parser.add_argument(
+            '--filter',
+            action='store_true',
+            help='Override to update your filters.',
+        )
 
     def handle_app_config(self, app_config, **options):
         print('==============================')
@@ -94,6 +100,10 @@ class Command(AppCommand):
 
         if options['unittest'] or options['all']:
             generators.append(UnitTestGenerator)
+
+        if options['filter'] or options['all']:
+            generators.append(FilterGenerator)
+
 
         # Execute the list
         for generator in generators:
