@@ -86,7 +86,8 @@ class FieldMeta(object):
             self.decimal_places = self.django_field.decimal_places
             self.max_digits = self.django_field.max_digits
 
-        if self.field_type_string == 'ForeignKey':
+        if self.field_type_string == 'ForeignKey' \
+            or self.field_type_string == 'OneToOneField':
             self.related_model = self.django_field.remote_field.model
 
         # get validators
@@ -231,6 +232,8 @@ class FactoryMeta(object):
             self.generate_date_time_field_code()
         elif field_type == 'ForeignKey':
             self.generate_foreign_key_code()
+        elif field_type == 'OneToOneField':
+            self.generate_one_to_one_code()
 
     def generate_char_field_code(self):
         # using sequence as default
@@ -290,6 +293,9 @@ class FactoryMeta(object):
             return
 
         self.code_line = '{} = None'.format(self.field.name)
+
+    def generate_one_to_one_code(self):
+        return self.generate_foreign_key_code()
 
     def add_import_lib(self, lib):
         import_line = None
