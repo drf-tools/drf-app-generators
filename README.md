@@ -75,6 +75,7 @@ $ python manage.py app_update {app} {options}
 | `--admin`| Update your admin. |
 | `--serializer`| Update your serializers. |
 | `--unittest`| Update your unittest. |
+| `--all`| Update all components. |
 
 Example: Update books app we just generated.
 ```bash

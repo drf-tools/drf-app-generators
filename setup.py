@@ -7,7 +7,7 @@ f.close()
 
 setup(
     name='drf-app-generators',
-    version='0.0.5',
+    version='0.0.6',
     description='Generate DRF Serializers, Views, Apis, Unit tests for your application.',
     long_description=long_description,
     long_description_content_type='text/markdown',

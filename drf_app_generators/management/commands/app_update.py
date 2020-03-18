@@ -23,6 +23,11 @@ class Command(AppCommand):
             help='If you app is using nested folders.',
         )
         parser.add_argument(
+            '--all',
+            action='store_true',
+            help='Override and update all components.',
+        )
+        parser.add_argument(
             '--factory',
             action='store_true',
             help='Override to update your factories.',
@@ -64,28 +69,32 @@ class Command(AppCommand):
             init=False
         )
 
+        # Build models meta
         for _, model in models.items():
             model_meta = ModelMeta(model=model)
             models_meta.append(model_meta)
 
         app.models_meta = models_meta
 
-        # Update Factory
-        if options['factory']:
-            FactoryGenerator(app, update=True)
+        # Update the all
+        generators: [object] = []
 
-        # Update Admin
-        if options['admin']:
-            AdminGenerator(app, update=True)
+        # Add update generators to execute list.
+        if options['factory'] or options['all']:
+            generators.append(FactoryGenerator)
 
-        # Update API
-        if options['api']:
-            ApiGenerator(app, update=True)
+        if options['admin'] or options['all']:
+            generators.append(AdminGenerator)
 
-        # Update Serializer
-        if options['serializer']:
-            SerializerGenerator(app, update=True)
+        if options['api'] or options['all']:
+            generators.append(ApiGenerator)
 
-        # Update Unit Test
-        if options['unittest']:
-            UnitTestGenerator(app, update=True)
+        if options['serializer'] or options['all']:
+            generators.append(SerializerGenerator)
+
+        if options['unittest'] or options['all']:
+            generators.append(UnitTestGenerator)
+
+        # Execute the list
+        for generator in generators:
+            generator(app, update=True)
