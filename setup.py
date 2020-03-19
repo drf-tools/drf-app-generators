@@ -7,12 +7,12 @@ f.close()
 
 setup(
     name='drf-app-generators',
-    version='0.0.6',
+    version='0.0.7',
     description='Generate DRF Serializers, Views, Apis, Unit tests for your application.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/drf-tools/drf-app-generators',
-    download_url = 'https://github.com/drf-tools/drf-app-generators/archive/v_003.tar.gz',
+    download_url = 'https://github.com/drf-tools/drf-app-generators/archive/v_007.tar.gz',
     author='Huy Tran',
     author_email='huy.tranquoc@asnet.com.vn',
     license='MIT',
