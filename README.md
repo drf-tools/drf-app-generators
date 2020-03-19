@@ -77,6 +77,7 @@ $ python manage.py app_update {app} {options}
 | `--unittest`| Update your unittest. |
 | `--filter`| Update your filters. |
 | `--all`| Update all components. |
+| `--add-models`| Add more models to your app. |
 
 Example: Update books app we just generated.
 ```bash
@@ -86,7 +87,8 @@ python manage.py app_update books \
     --api \
     --serializer \
     --unittest \
-    --filter
+    --filter \
+    --add-models Label,Category
 ```
 
 ## Tests

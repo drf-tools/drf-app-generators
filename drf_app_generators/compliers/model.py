@@ -16,6 +16,7 @@ class ModelMeta(object):
     fields: [object] = []
     django_fields: [object] = []
     abstract: bool = False
+    existed: bool = False # Mark that this model is already implemented.
 
     # Require libs for factory
     factory_required_libs: [str] = []
@@ -39,9 +40,8 @@ class ModelMeta(object):
         self.name = name.lower()
         self.verbose_name_plural = pluralize(self.name)
         self.object_name = name
+        self.existed = False
         self.app_label = pluralize(self.name)
-
-        print(self.object_name, name)
 
         return self
 
@@ -56,6 +56,7 @@ class ModelMeta(object):
         self.app_label = _meta.app_label
         self.abstract = _meta.abstract
         self.django_fields = _meta.fields
+        self.existed = True
 
         # Adding fields
         for django_field in self.django_fields:
