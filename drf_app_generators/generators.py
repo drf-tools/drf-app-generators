@@ -5,10 +5,19 @@ from django.template import Template, Context
 
 from django.conf import settings
 from drf_app_generators.templates.init import INIT_FILE
-from drf_app_generators.templates.models import MODEL_VIEW, MODELS_VIEW, MODEL_INIT
+from drf_app_generators.templates.models import (
+    MODEL_VIEW,
+    MODELS_VIEW,
+    MODEL_INIT,
+    MODELS_VIEW_UPDATE
+)
 from drf_app_generators.templates.apps import APP_VIEW
 from drf_app_generators.templates.apis import API_VIEW, APIS_VIEW, API_INIT
-from drf_app_generators.templates.factories import FACTORY_VIEW, FACTORIES_VIEW, FACTORY_INIT
+from drf_app_generators.templates.factories import (
+    FACTORY_VIEW,
+    FACTORIES_VIEW,
+    FACTORY_INIT
+)
 from drf_app_generators.templates.serializers import (
     SERIALIZER_VIEW,
     SERIALIZERS_VIEW,
@@ -26,9 +35,15 @@ INIT_FILENAME = '__init__.py'
 
 
 class BaseGenerator(object):
-    def __init__(self, app_config, force=False, update=False):
+    app_config: object = None
+    options: object = None
+    update: bool = False
+    base_dir: str = None
+
+    def __init__(self, app_config: object, force: bool=False, update: bool=False):
         self.app_config = app_config
         self.options = app_config.options
+        self.update = update
 
         if settings.BASE_DIR:
             self.base_dir = os.path.join(settings.BASE_DIR)
@@ -42,11 +57,20 @@ class BaseGenerator(object):
     # Generate files
     #--------------------------------------------------
     def generate_models(self):
-        if self.app_config.options.nested:
-            # generate init view
-            self._generate_by_group(group_name='models', init_view=MODEL_INIT)
+        if self.update:
+            if self.app_config.options.nested:
+                self._generate_by_group(group_name='models', init_view=MODEL_INIT)
+            else:
+                self.previous_content = self.read_previous_file('models.py')
+                self.context['previous_content'] = self.previous_content
+                self.view_template = Template(MODELS_VIEW_UPDATE)
+                self._generate_single_view(name='models')
         else:
-            self._generate_single_view(name='models')
+            if self.app_config.options.nested:
+                # generate init view
+                self._generate_by_group(group_name='models', init_view=MODEL_INIT)
+            else:
+                self._generate_single_view(name='models')
 
     def generate_app_config(self):
         content = self.app_config_content()
@@ -141,6 +165,9 @@ class BaseGenerator(object):
     # Get contents
     #--------------------------------------------------
     def get_grouping_content(self, model_meta, view):
+        """
+        Generate content for each files in nested folders.
+        """
         context = self.context
         if model_meta is not None:
             context = Context({
@@ -240,9 +267,10 @@ class BaseGenerator(object):
                 filename=f'{group_name}/__init__.py', content=content)
 
         for model_meta in self.app_config.models_meta:
-            content = getattr(self, f'{group_name}_content')(model_meta=model_meta)
-            filename = f'{group_name}/{model_meta.verbose_name_plural}.py'
-            self._generate_file_template(filename, content)
+            if not (model_meta.existed is True and group_name == 'models'):
+                content = getattr(self, f'{group_name}_content')(model_meta=model_meta)
+                filename = f'{group_name}/{model_meta.verbose_name_plural}.py'
+                self._generate_file_template(filename, content)
 
     def _generate_single_view(self, name):
         content = getattr(self, f'{name}_content')()
@@ -299,6 +327,19 @@ class BaseGenerator(object):
         new_file.close()
         return True
 
+    def read_previous_file(self, filename: str, base_dir: str=None):
+        if base_dir is None:
+            base_dir = self.base_dir
+
+        file_path = os.path.join(base_dir, filename)
+        content = str()
+
+        if os.path.exists(file_path):
+            with open(file_path, 'r') as file:
+                content = file.read()
+
+        return content
+
 
 class AppFolderGenerator(BaseGenerator):
     def __init__(self, app_config, force=False):
@@ -330,8 +371,11 @@ class TestFolderGenerator(BaseGenerator):
 
 class ModelGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force=False):
-        super(ModelGenerator, self).__init__(app_config, force)
+    def __init__(self, app_config, force=False, update=False):
+        super(ModelGenerator, self).__init__(app_config, force, update=update)
+
+        if update:
+            print_out_override_message('models', app_config=app_config)
 
         self.base_dir = os.path.join(self.base_dir, self.app_config.name)
         self.view_template = Template(MODELS_VIEW)
@@ -401,8 +445,11 @@ class AdminGenerator(BaseGenerator):
 
 class FilterGenerator(BaseGenerator):
 
-    def __init__(self, app_config, force=False):
+    def __init__(self, app_config, force=False, update=False):
         super(FilterGenerator, self).__init__(app_config, force)
+
+        if update:
+            print_out_override_message('filters', app_config=app_config)
 
         self.base_dir = os.path.join(
             self.base_dir, self.app_config.name)

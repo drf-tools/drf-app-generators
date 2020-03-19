@@ -1,11 +1,14 @@
 from django.core.management.base import AppCommand
-from drf_app_generators.meta import AppConfig, AppOptions, ModelMeta
+from drf_app_generators.compliers.app import AppConfig, AppOptions
+from drf_app_generators.compliers.model import ModelMeta
 from drf_app_generators.generators import (
     AdminGenerator,
     FactoryGenerator,
     ApiGenerator,
     SerializerGenerator,
     UnitTestGenerator,
+    FilterGenerator,
+    ModelGenerator,
 )
 
 
@@ -21,6 +24,11 @@ class Command(AppCommand):
             '--nested',
             action='store_true',
             help='If you app is using nested folders.',
+        )
+        parser.add_argument(
+            '--add-models',
+            type=str,
+            help='Add more models to the existing app.',
         )
         parser.add_argument(
             '--all',
@@ -52,6 +60,11 @@ class Command(AppCommand):
             action='store_true',
             help='Override to update your unit test.',
         )
+        parser.add_argument(
+            '--filter',
+            action='store_true',
+            help='Override to update your filters.',
+        )
 
     def handle_app_config(self, app_config, **options):
         print('==============================')
@@ -59,6 +72,12 @@ class Command(AppCommand):
 
         models = app_config.models
         models_meta: [object] = []
+        new_models: [str] = []
+
+        # Get new models from command.
+        if options['add_models']:
+            new_models = options['add_models'].split(',')
+            new_models = [x.strip() for x in new_models]
 
         # create app config
         app_option = AppOptions(
@@ -74,12 +93,21 @@ class Command(AppCommand):
             model_meta = ModelMeta(model=model)
             models_meta.append(model_meta)
 
+        # Build models meta for new models
+        for model_name in new_models:
+            model_meta = ModelMeta(model=None)
+            model_meta.build_from_name(name=model_name)
+            models_meta.append(model_meta)
+
         app.models_meta = models_meta
 
         # Update the all
         generators: [object] = []
 
         # Add update generators to execute list.
+        if options['add_models']:
+            generators.append(ModelGenerator)
+
         if options['factory'] or options['all']:
             generators.append(FactoryGenerator)
 
@@ -94,6 +122,9 @@ class Command(AppCommand):
 
         if options['unittest'] or options['all']:
             generators.append(UnitTestGenerator)
+
+        if options['filter'] or options['all']:
+            generators.append(FilterGenerator)
 
         # Execute the list
         for generator in generators:

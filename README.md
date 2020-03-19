@@ -75,7 +75,9 @@ $ python manage.py app_update {app} {options}
 | `--admin`| Update your admin. |
 | `--serializer`| Update your serializers. |
 | `--unittest`| Update your unittest. |
+| `--filter`| Update your filters. |
 | `--all`| Update all components. |
+| `--add-models`| Add more models to your app. |
 
 Example: Update books app we just generated.
 ```bash
@@ -84,7 +86,9 @@ python manage.py app_update books \
     --admin \
     --api \
     --serializer \
-    --unittest
+    --unittest \
+    --filter \
+    --add-models Label,Category
 ```
 
 ## Tests

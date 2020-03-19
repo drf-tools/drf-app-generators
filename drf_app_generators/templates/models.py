@@ -1,4 +1,4 @@
-__all__ = ['MODEL_VIEW', 'MODELS_VIEW', 'MODEL_INIT']
+__all__ = ['MODEL_VIEW', 'MODELS_VIEW', 'MODEL_INIT', 'MODELS_VIEW_UPDATE']
 
 MODELS_VIEW = """from django.db import models
 
@@ -19,6 +19,21 @@ class {{ model.object_name }}(TimeStampedModel):
 
     def __str__(self):
         return super().__str__()
+{% endfor %}"""
+
+MODELS_VIEW_UPDATE = """{% autoescape off %}{{ previous_content }}{% endautoescape %}{% for model in models %}{% if model.existed is False %}# =============================================================================
+# {{ model.object_name }}
+# =============================================================================
+class {{ model.object_name }}QuerySet(QuerySet):
+    pass
+
+
+class {{ model.object_name }}(TimeStampedModel):
+
+    objects = {{ model.object_name }}QuerySet.as_manager()
+
+    def __str__(self):
+        return super().__str__(){% endif %}
 {% endfor %}"""
 
 MODEL_VIEW = """from django.db import models
