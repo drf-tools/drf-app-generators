@@ -80,7 +80,7 @@ class {{ model_meta.object_name }}ViewSetTestCase(BaseTestCase):
         {{ model_meta.name }} = {{ model_meta.object_name }}.objects.all()
         self.assertEqual(len({{ model_meta.name }}), 1)
 
-        # Fill in futher test cases
+        # Fill in further test cases
 
     def test_get_{{ model_meta.name }}_pagination_ok(self):
         self.sampling.generate_by_model(
@@ -116,6 +116,7 @@ class {{ model_meta.object_name }}ViewSetTestCase(BaseTestCase):
         self.assertEqual(len(resp_json['results']), 25)
 
     def test_post_{{ model_meta.name }}_accepted(self):
+        # TODO: Fill in your data.
         data = {}
         self.post_json_created(data=data)
 
@@ -123,9 +124,10 @@ class {{ model_meta.object_name }}ViewSetTestCase(BaseTestCase):
         {{ model_meta.verbose_name_plural }} = {{ model_meta.object_name }}.objects.all()
         self.assertEqual(len({{ model_meta.verbose_name_plural }}), 2)
 
-        # Fill in futher test cases
+        # Fill in further test cases
 
     def test_put_{{ model_meta.name }}_accepted(self):
+        # TODO: Fill in your data.
         data = {}
         {{ model_meta.name }} = {{ model_meta.object_name }}.objects.first()
         self.put_json_ok(data=data, fragment='%d/' % {{ model_meta.name }}.id)
@@ -134,7 +136,7 @@ class {{ model_meta.object_name }}ViewSetTestCase(BaseTestCase):
         {{ model_meta.name }} = {{ model_meta.object_name }}.objects.all()
         self.assertEqual(len({{ model_meta.name }}), 1)
 
-        # Fill in futher test cases
+        # Fill in further test cases
 
     def test_delete_{{ model_meta.name }}_accepted(self):
         {{ model_meta.name }} = {{ model_meta.object_name }}.objects.first()
@@ -144,5 +146,5 @@ class {{ model_meta.object_name }}ViewSetTestCase(BaseTestCase):
         {{ model_meta.name }} = {{ model_meta.object_name }}.objects.non_archived_only()
         self.assertEqual(len({{ model_meta.name }}), 0)
 
-        # Fill in futher test cases
+        # Fill in further test cases
 """
